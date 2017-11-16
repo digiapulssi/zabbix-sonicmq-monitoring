@@ -120,7 +120,7 @@ public class SonicMQMonitor implements Closeable {
     				SonicMQConnection connection = new SonicMQConnection(component, conn);
     				discoveredConnections.add(connection);
     		    	for (ISubscriberData subscriberData : getSubscribers(proxy, conn)) {
-    		    		SonicMQSubscriber subscriber = new SonicMQSubscriber(conn, subscriberData);
+    		    		SonicMQSubscriber subscriber = new SonicMQSubscriber(component, conn, subscriberData);
     		    		discoveredSubscribers.add(subscriber);
     		    	}
     			}
@@ -191,7 +191,7 @@ public class SonicMQMonitor implements Closeable {
         }
         for (SonicMQSubscriber subscriber : discoveredSubscribers) {
         	data.addDiscoveryItem(DiscoveryItemClass.Subscriber,
-        			new SubscriberDiscoveryItem(subscriber.getConnectionId(), subscriber.getTopicId(), 
+        			new SubscriberDiscoveryItem(subscriber.getBroker(), subscriber.getConnectionId(), subscriber.getTopicId(), 
         					subscriber.getTopic(), subscriber.getHost(), subscriber.getUser()));
         }
     }

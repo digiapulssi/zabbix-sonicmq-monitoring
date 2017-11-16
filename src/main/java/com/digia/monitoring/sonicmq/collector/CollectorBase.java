@@ -4,7 +4,6 @@ import com.digia.monitoring.sonicmq.IClientProxyFactory;
 import com.digia.monitoring.sonicmq.ICollector;
 import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
-import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentProxy;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;

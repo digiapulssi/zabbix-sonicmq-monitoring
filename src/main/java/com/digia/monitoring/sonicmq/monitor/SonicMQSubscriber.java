@@ -25,17 +25,21 @@ public class SonicMQSubscriber {
 	/** User. */
 	private String user;
 	
+	/** Broker. */
+	private String broker;
+	
 	/**
 	 * Creates new SonicMQSubscriber.
 	 * @param connection Connection data of subscription
 	 * @param subscriber Subscriber data of subscription
 	 */
-	public SonicMQSubscriber(IConnectionData connection, ISubscriberData subscriber) {
+	public SonicMQSubscriber(SonicMQComponent broker, IConnectionData connection, ISubscriberData subscriber) {
 		this.connectionId = getIdentifier(connection);
 		this.topicId = getIdentifier(subscriber);
 		this.topic = subscriber.getTopicName();
 		this.host = connection.getHost();
 		this.user = connection.getUser();
+		this.broker = broker.getName();
 	}
 	
 	public String getHost() {
@@ -56,5 +60,9 @@ public class SonicMQSubscriber {
 	
 	public String getTopicId() {
 		return topicId;
+	}
+	
+	public String getBroker() {
+		return broker;
 	}
 }

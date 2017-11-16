@@ -1,7 +1,5 @@
 package com.digia.monitoring.sonicmq.model;
 
-import static com.digia.monitoring.sonicmq.util.DigestUtil.*;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ConnectionDiscoveryItem extends NamedDiscoveryItem {
