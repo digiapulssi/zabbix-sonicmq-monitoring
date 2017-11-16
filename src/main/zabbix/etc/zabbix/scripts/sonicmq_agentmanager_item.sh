@@ -2,7 +2,7 @@
 
 set -e
 
-AGENT=$1
+AGENTMANAGER=$1
 ITEM=$2
 
 cd $(dirname $0)
@@ -13,4 +13,4 @@ cd $(dirname $0)
 # Check update
 ./sonicmq_update_stats.sh
 
-cat $SMQ_MON_OUTPUT_FILE | jq '.data.Agent["'$AGENT'"].data["'$ITEM'"] // empty'
+cat $SMQ_MON_OUTPUT_FILE | jq '.data.AgentManager["'$AGENTMANAGER'"].data["'$ITEM'"] // empty'
