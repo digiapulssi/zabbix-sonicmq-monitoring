@@ -13,4 +13,4 @@ cd $(dirname $0)
 # Check update
 ./sonicmq_update_stats.sh
 
-cat $SMQ_MON_OUTPUT_FILE | jq '.data.Agent["'$BROKER'"].data["'$ITEM'"]'
+cat $SMQ_MON_OUTPUT_FILE | jq '.data.Agent["'$BROKER'"].data["'$ITEM'"] // empty'

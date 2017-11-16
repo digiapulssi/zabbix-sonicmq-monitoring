@@ -12,4 +12,4 @@ cd $(dirname $0)
 # Check update
 ./sonicmq_update_stats.sh
 
-cat $SMQ_MON_OUTPUT_FILE | jq .discovery.$COMPONENT
+cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.'$COMPONENT' // empty'
