@@ -1,0 +1,13 @@
+{
+	"location": "tcp://localhost:2506",
+	"domain": "Domain1",
+	"username": "username",
+	"password": "password",
+	"timeout": 30000,
+	"collectors": [
+		"com.digia.monitoring.sonicmq.collector.AgentCollector",
+		"com.digia.monitoring.sonicmq.collector.AgentManagerCollector",
+		"com.digia.monitoring.sonicmq.collector.BrokerCollector",
+        "com.digia.monitoring.sonicmq.collector.SubscriberCollector"
+	]
+}
