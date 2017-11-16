@@ -178,8 +178,8 @@ public class SonicMQMonitor implements Closeable {
         for (SonicMQConnection connection : discoveredConnections) {
         	if (connection.getId() != null) {
 	        	data.addDiscoveryItem(DiscoveryItemClass.Connection, 
-	        			new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getName(), 
-	        					connection.getHost(), connection.getUser(), connection.getId()));
+	        			new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getId(), connection.getName(),
+	        					connection.getHost(), connection.getUser()));
         	} else {
         		logger.warn("Cannot collect connection for user {} from {} due to missing identifier.", 
         				connection.getUser(), connection.getHost());
