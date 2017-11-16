@@ -4,7 +4,7 @@
 set -e
 
 SONIC_JAR_PATH=${1:-$SONIC_JAR_PATH}
-OUTPUT_FILE=${2:-/tmp/sonic-monitor-output.json}
+OUTPUT_FILE=${2:-/tmp/sonicmq-monitor-output.json}
 CONFIG_FILE=${3:-config.json}
 
 CLASSPATH=zabbix-sonicmq-monitoring.jar
