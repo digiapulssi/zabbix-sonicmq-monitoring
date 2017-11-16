@@ -2,8 +2,9 @@
 
 set -e
 
-CONNECTION=$1
-ITEM=$2
+BROKER=$1
+CONNECTION=$2
+ITEM=$3
 
 cd $(dirname $0)
 
@@ -13,4 +14,4 @@ cd $(dirname $0)
 # Check update
 ./sonicmq_update_stats.sh
 
-cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker[].items.Connection["'$CONNECTION'"].data["'$ITEM'"] // empty'
+cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker['$BROKER'].items.Connection["'$CONNECTION'"].data["'$ITEM'"] // empty'
