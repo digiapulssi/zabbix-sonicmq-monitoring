@@ -22,6 +22,8 @@ import com.sonicsw.mq.common.runtime.ISubscriberData;
 import com.sonicsw.mq.common.runtime.JMSObjectFactory;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
 
+import static com.digia.monitoring.sonicmq.util.DigestUtil.*;
+
 /**
  * <p>Provides convenience methods for accessing data provided by SonicMQ proxies.</p>
  * 
@@ -145,4 +147,21 @@ public class SonicUtil {
             return null;
         }
     }
+    
+    public static String getIdentifier(IConnectionData connection) {
+    	if (connection.getConnectID() != null) {
+    		return sha1hex(connection.getConnectID());
+    	} else {
+    		return null;
+    	}
+    }
+    
+	/**
+	 * Returns identifier for subscriber.
+	 * @param subscriberData Subscriber
+	 * @return
+	 */
+	public static String getIdentifier(ISubscriberData subscriberData) {
+		return sha1hex(subscriberData.getTopicName());
+	}
 }

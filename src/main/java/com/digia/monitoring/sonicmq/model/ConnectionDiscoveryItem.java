@@ -18,11 +18,11 @@ public class ConnectionDiscoveryItem extends NamedDiscoveryItem {
 	@JsonProperty("{#ID}")
 	private String id;
 	
-	public ConnectionDiscoveryItem(String broker, String name, String host, String user) {
+	public ConnectionDiscoveryItem(String broker, String id, String name, String host, String user) {
 		super(name);
 		this.broker = broker;
 		this.host = host;
 		this.user = user;
-		this.id = sha1hex(name);
+		this.id = id;
 	}
 }

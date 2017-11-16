@@ -23,9 +23,9 @@ import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
  * 
  * @author Sami Pajunen
  */
-public class SonicMQJsonModelTests {
+public class SonicMQJsonModelTest {
     
-    private Logger logger = LoggerFactory.getLogger(SonicMQJsonModelTests.class);
+    private Logger logger = LoggerFactory.getLogger(SonicMQJsonModelTest.class);
 
     @Test
     public void testConnectionDataToJson() throws Exception {

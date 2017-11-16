@@ -3,13 +3,18 @@ package com.digia.monitoring.sonicmq.monitor;
 import com.sonicsw.mq.common.runtime.IConnectionData;
 import com.sonicsw.mq.common.runtime.ISubscriberData;
 
+import static com.digia.monitoring.sonicmq.util.SonicUtil.*;
+
 /**
  * Internal model for discovered SonicMQ subscriber.
  * @author Sami Pajunen
  */
 public class SonicMQSubscriber {
 	/** Subscription's connection. */
-	private String connectionName;
+	private String connectionId;
+	
+	/** Subscribed topic identifier. */
+	private String topicId;
 	
 	/** Subscribed topic. */
 	private String topic;
@@ -26,7 +31,8 @@ public class SonicMQSubscriber {
 	 * @param subscriber Subscriber data of subscription
 	 */
 	public SonicMQSubscriber(IConnectionData connection, ISubscriberData subscriber) {
-		this.connectionName = connection.getConnectID();
+		this.connectionId = getIdentifier(connection);
+		this.topicId = getIdentifier(subscriber);
 		this.topic = subscriber.getTopicName();
 		this.host = connection.getHost();
 		this.user = connection.getUser();
@@ -36,8 +42,8 @@ public class SonicMQSubscriber {
 		return host;
 	}
 	
-	public String getConnectionName() {
-		return connectionName;
+	public String getConnectionId() {
+		return connectionId;
 	}
 	
 	public String getUser() {
@@ -46,5 +52,9 @@ public class SonicMQSubscriber {
 	
 	public String getTopic() {
 		return topic;
+	}
+	
+	public String getTopicId() {
+		return topicId;
 	}
 }

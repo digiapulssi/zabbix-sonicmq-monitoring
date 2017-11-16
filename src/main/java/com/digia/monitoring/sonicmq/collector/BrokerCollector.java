@@ -100,6 +100,7 @@ public class BrokerCollector extends CollectorBase {
     				sb.append(components[i]);
     			}
     			metric = sb.toString();
+    			// NOTE: relies on assumption that last part is connectionID, see SonicUtil.getIdentifier(IConnectionData)
     			entity = sha1hex(components[components.length - 1]);
     			if (metric.startsWith("connection")) {
     				itemClass = DiscoveryItemClass.Connection;

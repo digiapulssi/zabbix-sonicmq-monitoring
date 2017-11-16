@@ -17,12 +17,12 @@ public class SubscriberDiscoveryItem extends NamedDiscoveryItem {
 	@JsonProperty("{#CONNECTIONID}")
 	private String connectionId;
 	
-	public SubscriberDiscoveryItem(String connectionName, String topic, String host, String user) {
+	public SubscriberDiscoveryItem(String connectionId, String topicId, String topic, String host, String user) {
 		super(topic);
 		this.host = host;
 		this.user = user;
 		this.id = sha1hex(topic);
-		this.connectionId = sha1hex(connectionName);
+		this.connectionId = connectionId;
 	}
 
 }

@@ -2,6 +2,8 @@ package com.digia.monitoring.sonicmq.monitor;
 
 import com.sonicsw.mq.common.runtime.IConnectionData;
 
+import static com.digia.monitoring.sonicmq.util.SonicUtil.*;
+
 /**
  * Internal model for discovered SonicMQ connection.
  * @author Sami Pajunen
@@ -16,6 +18,8 @@ public class SonicMQConnection {
 	private String host;
 	/** Connection user. */
 	private String user;
+	/** Connection identifier. */
+	private String id;
 	
 	/**
 	 * Creates new SonicMQConnection.
@@ -27,6 +31,7 @@ public class SonicMQConnection {
 		this.name = connection.getConnectID();
 		this.host = connection.getHost();
 		this.user = connection.getUser();
+		this.id = getIdentifier(connection);
 	}
 	
 	public SonicMQComponent getBroker() {
@@ -43,5 +48,9 @@ public class SonicMQConnection {
 	
 	public String getUser() {
 		return user;
+	}
+	
+	public String getId() {
+		return id;
 	}
 }

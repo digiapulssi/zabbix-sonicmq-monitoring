@@ -29,5 +29,10 @@ public interface ISonicMQComponent {
      * @return Container name
      */
     String getContainerName();
-
+    
+    /**
+     * Returns name of component state.
+     * @return Component state name
+     */
+    String getState();
 }

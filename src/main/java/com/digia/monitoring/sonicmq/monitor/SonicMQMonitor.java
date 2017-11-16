@@ -25,6 +25,7 @@ import com.sonicsw.mf.common.runtime.IComponentState;
 import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.common.runtime.IState;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
+import com.sonicsw.mf.mgmtapi.runtime.ProxyRuntimeException;
 import com.sonicsw.mq.common.runtime.IConnectionData;
 import com.sonicsw.mq.common.runtime.IConnectionMemberDetails;
 import com.sonicsw.mq.common.runtime.IConnectionMemberInfo;
@@ -153,10 +154,16 @@ public class SonicMQMonitor implements Closeable {
      * @param data Monitoring data
      */
     public void collectMetricsData(SonicMQMonitoringData data) {
-        for (ISonicMQComponent component : discoveredComponents) {
-            for (ICollector collector : collectors) {
-                collector.collectData(clientProxyFactory, component, data);
-            }
+        for (SonicMQComponent component : discoveredComponents) {
+        	if (component.isOnline()) {
+	        	try {
+		            for (ICollector collector : collectors) {
+		                collector.collectData(clientProxyFactory, component, data);
+		            }
+	        	} catch (ProxyRuntimeException ex) {
+	        		logger.error("Unable to collect data from component " + component.getName() + ".", ex);
+	        	}
+        	}
         }
     }
     
@@ -169,9 +176,14 @@ public class SonicMQMonitor implements Closeable {
             data.addDiscoveryItem(component.getType().getDiscoveryItemClass(), new NamedDiscoveryItem(component.getName()));
         }
         for (SonicMQConnection connection : discoveredConnections) {
-        	data.addDiscoveryItem(DiscoveryItemClass.Connection, 
-        			new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getName(), 
-        					connection.getHost(), connection.getUser()));
+        	if (connection.getId() != null) {
+	        	data.addDiscoveryItem(DiscoveryItemClass.Connection, 
+	        			new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getName(), 
+	        					connection.getHost(), connection.getUser(), connection.getId()));
+        	} else {
+        		logger.warn("Cannot collect connection for user {} from {} due to missing identifier.", 
+        				connection.getUser(), connection.getHost());
+        	}
         }
         for (SonicMQQueue queue : discoveredQueues) {
         	data.addDiscoveryItem(DiscoveryItemClass.Queue, 
@@ -179,7 +191,8 @@ public class SonicMQMonitor implements Closeable {
         }
         for (SonicMQSubscriber subscriber : discoveredSubscribers) {
         	data.addDiscoveryItem(DiscoveryItemClass.Subscriber,
-        			new SubscriberDiscoveryItem(subscriber.getConnectionName(), subscriber.getTopic(), subscriber.getHost(), subscriber.getUser()));
+        			new SubscriberDiscoveryItem(subscriber.getConnectionId(), subscriber.getTopicId(), 
+        					subscriber.getTopic(), subscriber.getHost(), subscriber.getUser()));
         }
     }
 
