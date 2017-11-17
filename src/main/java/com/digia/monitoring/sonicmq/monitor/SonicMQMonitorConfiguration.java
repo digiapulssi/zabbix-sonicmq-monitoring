@@ -15,6 +15,7 @@ public class SonicMQMonitorConfiguration {
     private String password;
     private long timeout = 60000;
     private List<String> collectors;
+    private boolean collectAllConnections;
     
     public String getLocation() {
         return location;
@@ -62,6 +63,14 @@ public class SonicMQMonitorConfiguration {
 
     public void setCollectors(List<String> collectors) {
         this.collectors = collectors;
+    }
+    
+    public boolean isCollectAllConnections() {
+        return collectAllConnections;
+    }
+
+    public void setCollectAllConnections(boolean collectAllConnections) {
+        this.collectAllConnections = collectAllConnections;
     }
 
     @Override
