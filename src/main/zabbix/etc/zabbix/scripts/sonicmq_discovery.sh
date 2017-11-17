@@ -12,4 +12,9 @@ cd $(dirname $0)
 # Check update
 ./sonicmq_update_stats.sh
 
-cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.'$COMPONENT' // empty'
+if [ "$COMPONENT" = "ConnectionAggregate" ]; then
+  AGGREGATED=$(cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.Connection.data | map(del(.["{#ID}"])) | map(del(.["{#NAME}"])) | unique // empty')
+  echo '{ "data": '$AGGREGATED'}'
+else
+  cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.'$COMPONENT' // empty'
+fi
