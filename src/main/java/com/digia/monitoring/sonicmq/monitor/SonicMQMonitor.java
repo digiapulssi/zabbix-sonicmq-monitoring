@@ -29,6 +29,7 @@ import com.sonicsw.mf.mgmtapi.runtime.ProxyRuntimeException;
 import com.sonicsw.mq.common.runtime.IConnectionData;
 import com.sonicsw.mq.common.runtime.IConnectionMemberDetails;
 import com.sonicsw.mq.common.runtime.IConnectionMemberInfo;
+import com.sonicsw.mq.common.runtime.IConnectionTreeNode;
 import com.sonicsw.mq.common.runtime.IQueueData;
 import com.sonicsw.mq.common.runtime.ISubscriberData;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
@@ -207,20 +208,17 @@ public class SonicMQMonitor implements Closeable {
         for (ISonicMQComponent component : discoveredComponents) {
             if (component.getType() == ComponentType.BROKER) {
                 IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
-                for (IConnectionData c : getAllConnections(proxy)) {
-                    IConnectionData conn = (IConnectionData) c;
-                    long ref = conn.getConnectionMemberRef();
-                    long start = System.currentTimeMillis();
-                    IConnectionMemberInfo memberInfo = proxy.getConnectionMemberDetails(ref).getInfo();
-                    long end = System.currentTimeMillis();
-                    logger.debug("Connection {}", conn.getHost());
-                    logger.debug("Getting member details took {}ms", (end-start));
-                    data.addConnectionData(
-                            component.getName(),
-                            conn.getHost(), 
-                            conn.getUser(),
-                            collectSubscriberData(proxy, ref),
-                            collectConnectionMemberData(proxy, memberInfo));
+                for (IConnectionData conn : getAllConnections(proxy)) {
+                    if (config.isCollectAllConnections() || conn.isApplicationConnection()) {
+                        long ref = conn.getConnectionMemberRef();
+                        IConnectionMemberInfo memberInfo = proxy.getConnectionMemberDetails(ref).getInfo();
+                        data.addConnectionData(
+                                component.getName(),
+                                conn.getHost(), 
+                                conn.getUser(),
+                                collectSubscriberData(proxy, ref),
+                                collectConnectionMemberData(proxy, getConnectionTree(proxy, ref)));
+                    }
                 }
             }
         }
@@ -272,14 +270,14 @@ public class SonicMQMonitor implements Closeable {
      * @param memberRefs Member refs
      * @return List of connection members' collected data
      */
-    private List<ConnectionMemberData> collectConnectionMemberData(IBrokerProxy proxy, IConnectionMemberInfo info) {
-    	long start = System.currentTimeMillis();
+    private List<ConnectionMemberData> collectConnectionMemberData(IBrokerProxy proxy, IConnectionTreeNode node) {
         List<ConnectionMemberData> memberDataList = new ArrayList<ConnectionMemberData>();
-        for (IConnectionMemberDetails memberDetails : getChildConnectionMemberDetails(proxy, info)) {
-            IConnectionMemberInfo memberInfo = memberDetails.getInfo();
+        for (IConnectionTreeNode childNode : getConnectionTreeNodeChildren(node)) {
+            IConnectionMemberInfo memberInfo = childNode.getInfo();
+            IConnectionMemberDetails memberDetails = proxy.getConnectionMemberDetails(memberInfo.getRef());
             
             ConnectionMemberData memberData = 
-                    new ConnectionMemberData(collectConnectionMemberData(proxy, memberInfo));
+                    new ConnectionMemberData(collectConnectionMemberData(proxy, childNode));
             
             memberData.addAttribute(CONNECTION_MEMBER_STATE, memberDetails.getStateString());
             memberData.addAttribute(CONNECTION_MEMBER_TYPE, memberInfo.getTypeString());
@@ -290,8 +288,6 @@ public class SonicMQMonitor implements Closeable {
             }
             memberDataList.add(memberData);
         }
-    	long end = System.currentTimeMillis();
-    	logger.debug("Collecting connection data took {}ms", (end-start));
         return memberDataList;
     }
     
