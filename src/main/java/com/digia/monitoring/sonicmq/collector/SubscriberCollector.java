@@ -17,31 +17,31 @@ import org.slf4j.LoggerFactory;
  * @author Sami Pajunen
  */
 public class SubscriberCollector extends CollectorBase {
-	
-	private Logger logger = LoggerFactory.getLogger(SubscriberCollector.class);
-	
-	@Override
-	protected void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
+
+    private Logger logger = LoggerFactory.getLogger(SubscriberCollector.class);
+
+    @Override
+    protected void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
         DiscoveryItemData brokerData = data.getItemData(DiscoveryItemClass.Broker, name);
-        
+
         for (IConnectionData connection : getAllConnections(proxy)) {
-        	String connectionKey = getIdentifier(connection);
-        	if (connectionKey != null) {
-	        	DiscoveryItemData connectionData = brokerData.getItemData(DiscoveryItemClass.Connection, connectionKey);
-	        	for (ISubscriberData subscriber : getSubscribers(proxy, connection)) {
-	        		DiscoveryItemData subscriberData = 
-	        				connectionData.getItemData(DiscoveryItemClass.Subscriber, getIdentifier(subscriber));
-	        		subscriberData.setValue("subscriber.TopicName", subscriber.getTopicName());
-	        		subscriberData.setValue("subscriber.SubscriptionName", subscriber.getSubscriptionName());
-	        		subscriberData.setValue("subscriber.MessageCount", subscriber.getMessageCount());
-	        		subscriberData.setValue("subscriber.MessageSize", subscriber.getMessageSize());
-	        		subscriberData.setValue("subscriber.IsDurable", subscriber.isDurable());
-	        		subscriberData.setValue("subscriber.IsConnectionConsumer", subscriber.isConnectionConsumer());
-	        	}
-        	} else {
-        		logger.warn("Cannot collect connection subscribers due to missing connection ID. User={}, Host={}",
-        				connection.getUser(), connection.getHost());
-        	}
+            String connectionKey = getIdentifier(connection);
+            if (connectionKey != null) {
+                DiscoveryItemData connectionData = brokerData.getItemData(DiscoveryItemClass.Connection, connectionKey);
+                for (ISubscriberData subscriber : getSubscribers(proxy, connection)) {
+                    DiscoveryItemData subscriberData = connectionData.getItemData(DiscoveryItemClass.Subscriber,
+                            getIdentifier(subscriber));
+                    subscriberData.setData("subscriber.TopicName", subscriber.getTopicName());
+                    subscriberData.setData("subscriber.SubscriptionName", subscriber.getSubscriptionName());
+                    subscriberData.setData("subscriber.MessageCount", subscriber.getMessageCount());
+                    subscriberData.setData("subscriber.MessageSize", subscriber.getMessageSize());
+                    subscriberData.setData("subscriber.IsDurable", subscriber.isDurable());
+                    subscriberData.setData("subscriber.IsConnectionConsumer", subscriber.isConnectionConsumer());
+                }
+            } else {
+                logger.warn("Cannot collect connection subscribers due to missing connection ID. User={}, Host={}",
+                        connection.getUser(), connection.getHost());
+            }
         }
-	}
+    }
 }

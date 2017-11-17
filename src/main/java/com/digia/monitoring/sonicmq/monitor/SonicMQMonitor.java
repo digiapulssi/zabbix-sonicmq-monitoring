@@ -142,7 +142,6 @@ public class SonicMQMonitor implements Closeable {
             if (component.getType() == ComponentType.BROKER) {
                 IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
                 for (IQueueData queueData : getAllQueues(proxy)) {
-
                     SonicMQQueue queue = new SonicMQQueue(component, queueData);
                     discoveredQueues.add(queue);
                 }

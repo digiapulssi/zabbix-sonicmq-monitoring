@@ -84,7 +84,7 @@ public class SonicMQMonitoringData {
             data = new DiscoveryItemDataMap();
         }
         DiscoveryItemData itemData = data.getData(itemClass, discoveryItemName);
-        itemData.setValue(key, value);
+        itemData.setData(key, value);
     }
     
     public DiscoveryItemData getItemData(DiscoveryItemClass itemClass, String discoveryItemName) {
@@ -112,6 +112,19 @@ public class SonicMQMonitoringData {
             connectionData.put(componentName, connectionDataList);
         }
         connectionDataList.add(new ConnectionData(host, user, subscribers, members));
+    }
+    
+    public ConnectionDiscoveryItem getDiscoveredConnection(String id) {
+        @SuppressWarnings("unchecked")
+        DiscoveryItems<ConnectionDiscoveryItem> connections = (DiscoveryItems<ConnectionDiscoveryItem>) discovery.get(DiscoveryItemClass.Connection);
+        if (connections != null) {
+            for (ConnectionDiscoveryItem item : connections.getData()) {
+                if (item.getId().equals(id)) {
+                    return item;
+                }
+            }
+        }
+        return null;
     }
     
     /**
