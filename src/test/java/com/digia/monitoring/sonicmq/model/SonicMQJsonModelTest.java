@@ -23,9 +23,9 @@ import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
  * 
  * @author Sami Pajunen
  */
-public class SonicMQJsonModelTests {
+public class SonicMQJsonModelTest {
     
-    private Logger logger = LoggerFactory.getLogger(SonicMQJsonModelTests.class);
+    private Logger logger = LoggerFactory.getLogger(SonicMQJsonModelTest.class);
 
     @Test
     public void testConnectionDataToJson() throws Exception {
@@ -68,10 +68,10 @@ public class SonicMQJsonModelTests {
     @Test
     public void testDiscoveryItemDataToJson() throws Exception {
         DiscoveryItemData itemData = new DiscoveryItemData();
-        itemData.setValue(IAgentManagerProxy.SYSTEM_POLLTHREADS_CURRENTPOOLSIZE_METRIC_ID.getAbsoluteName(), 31);
-        itemData.setValue(IAgentManagerProxy.SYSTEM_POLLTHREADS_MAXPOOLSIZE_METRIC_ID.getAbsoluteName(), 100);
-        itemData.setValue(IAgentManagerProxy.SYSTEM_POLLTHREADS_POOLWAITS_METRIC_ID.getAbsoluteName(), 2);
-        itemData.setValue("broker.State", "STARTED");
+        itemData.setData(IAgentManagerProxy.SYSTEM_POLLTHREADS_CURRENTPOOLSIZE_METRIC_ID.getAbsoluteName(), 31);
+        itemData.setData(IAgentManagerProxy.SYSTEM_POLLTHREADS_MAXPOOLSIZE_METRIC_ID.getAbsoluteName(), 100);
+        itemData.setData(IAgentManagerProxy.SYSTEM_POLLTHREADS_POOLWAITS_METRIC_ID.getAbsoluteName(), 2);
+        itemData.setData("broker.State", "STARTED");
         
         String json = convertToJson(itemData);
         logger.info(json);

@@ -25,9 +25,11 @@ import com.sonicsw.mf.common.runtime.IComponentState;
 import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.common.runtime.IState;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
+import com.sonicsw.mf.mgmtapi.runtime.ProxyRuntimeException;
 import com.sonicsw.mq.common.runtime.IConnectionData;
 import com.sonicsw.mq.common.runtime.IConnectionMemberDetails;
 import com.sonicsw.mq.common.runtime.IConnectionMemberInfo;
+import com.sonicsw.mq.common.runtime.IConnectionTreeNode;
 import com.sonicsw.mq.common.runtime.IQueueData;
 import com.sonicsw.mq.common.runtime.ISubscriberData;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
@@ -65,7 +67,7 @@ public class SonicMQMonitor implements Closeable {
     
     private ClientProxyFactory clientProxyFactory;
     
-    private String domain;
+    private SonicMQMonitorConfiguration config;
     
     private List<SonicMQComponent> discoveredComponents = Collections.emptyList();
     private List<SonicMQConnection> discoveredConnections = Collections.emptyList();
@@ -80,8 +82,8 @@ public class SonicMQMonitor implements Closeable {
      */
     public SonicMQMonitor(SonicMQMonitorConfiguration config) throws SonicMQMonitoringException {
         clientProxyFactory = new ClientProxyFactory(config.getLocation(), config.getUsername(), config.getPassword(), config.getTimeout());
-        domain = config.getDomain();
         collectors = createCollectors(config.getCollectors());
+        this.config = config;
     }
     
     /**
@@ -90,7 +92,7 @@ public class SonicMQMonitor implements Closeable {
      */
     public void discoverComponents() {
         List<SonicMQComponent> discoveredComponents = new ArrayList<SonicMQComponent>();
-        IAgentManagerProxy domainProxy = clientProxyFactory.getDomainLevelAgentManagerProxy(domain);
+        IAgentManagerProxy domainProxy = clientProxyFactory.getDomainLevelAgentManagerProxy(config.getDomain());
         for (IState state : domainProxy.getCollectiveState()) {
             if (state instanceof IContainerState) {
                 for (IComponentState componentState : ((IContainerState) state).getComponentStates()) {
@@ -110,23 +112,25 @@ public class SonicMQMonitor implements Closeable {
      * {@link #discoverComponents()} has been called at least once.
      */
     public void discoverConnectionsAndSubscribers() {
-    	List<SonicMQConnection> discoveredConnections = new ArrayList<SonicMQConnection>();
-    	List<SonicMQSubscriber> discoveredSubscribers = new ArrayList<SonicMQSubscriber>();
-    	for (SonicMQComponent component : discoveredComponents) {
-    		if (component.getType() == ComponentType.BROKER) {
-    			IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
-    			for (IConnectionData conn : getAllConnections(proxy)) {
-    				SonicMQConnection connection = new SonicMQConnection(component, conn);
-    				discoveredConnections.add(connection);
-    		    	for (ISubscriberData subscriberData : getSubscribers(proxy, conn)) {
-    		    		SonicMQSubscriber subscriber = new SonicMQSubscriber(conn, subscriberData);
-    		    		discoveredSubscribers.add(subscriber);
-    		    	}
-    			}
-    		}
-    	}
-    	this.discoveredConnections = Collections.unmodifiableList(discoveredConnections);
-    	this.discoveredSubscribers = Collections.unmodifiableList(discoveredSubscribers);
+        List<SonicMQConnection> discoveredConnections = new ArrayList<SonicMQConnection>();
+        List<SonicMQSubscriber> discoveredSubscribers = new ArrayList<SonicMQSubscriber>();
+        for (SonicMQComponent component : discoveredComponents) {
+            if (component.getType() == ComponentType.BROKER) {
+                IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
+                for (IConnectionData conn : getAllConnections(proxy)) {
+                    if (config.isCollectAllConnections() || conn.isApplicationConnection()) {
+                        SonicMQConnection connection = new SonicMQConnection(component, conn);
+                        discoveredConnections.add(connection);
+                        for (ISubscriberData subscriberData : getSubscribers(proxy, conn)) {
+                            SonicMQSubscriber subscriber = new SonicMQSubscriber(component, conn, subscriberData);
+                            discoveredSubscribers.add(subscriber);
+                        }
+                    }
+                }
+            }
+        }
+        this.discoveredConnections = Collections.unmodifiableList(discoveredConnections);
+        this.discoveredSubscribers = Collections.unmodifiableList(discoveredSubscribers);
     }
 
     /**
@@ -134,18 +138,17 @@ public class SonicMQMonitor implements Closeable {
      * has been called at least once.
      */
     public void discoverQueues() {
-    	List<SonicMQQueue> discoveredQueues = new ArrayList<SonicMQQueue>();
-    	for (SonicMQComponent component : discoveredComponents) {
-    		if (component.getType() == ComponentType.BROKER) {
-    			IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
-    			for (IQueueData queueData : getAllQueues(proxy)) {
-    				
-    				SonicMQQueue queue = new SonicMQQueue(component, queueData);
-    				discoveredQueues.add(queue);
-    			}
-    		}
-    	}
-    	this.discoveredQueues = Collections.unmodifiableList(discoveredQueues);
+        List<SonicMQQueue> discoveredQueues = new ArrayList<SonicMQQueue>();
+        for (SonicMQComponent component : discoveredComponents) {
+            if (component.getType() == ComponentType.BROKER) {
+                IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
+                for (IQueueData queueData : getAllQueues(proxy)) {
+                    SonicMQQueue queue = new SonicMQQueue(component, queueData);
+                    discoveredQueues.add(queue);
+                }
+            }
+        }
+        this.discoveredQueues = Collections.unmodifiableList(discoveredQueues);
     }
     
     /**
@@ -153,9 +156,15 @@ public class SonicMQMonitor implements Closeable {
      * @param data Monitoring data
      */
     public void collectMetricsData(SonicMQMonitoringData data) {
-        for (ISonicMQComponent component : discoveredComponents) {
-            for (ICollector collector : collectors) {
-                collector.collectData(clientProxyFactory, component, data);
+        for (SonicMQComponent component : discoveredComponents) {
+            if (component.isOnline()) {
+                try {
+                    for (ICollector collector : collectors) {
+                        collector.collectData(clientProxyFactory, component, data);
+                    }
+                } catch (ProxyRuntimeException ex) {
+                    logger.error("Unable to collect data from component " + component.getName() + ".", ex);
+                }
             }
         }
     }
@@ -166,20 +175,28 @@ public class SonicMQMonitor implements Closeable {
      */
     public void collectDiscoveryItems(SonicMQMonitoringData data) {
         for (ISonicMQComponent component : discoveredComponents) {
-            data.addDiscoveryItem(component.getType().getDiscoveryItemClass(), new NamedDiscoveryItem(component.getName()));
+            data.addDiscoveryItem(component.getType().getDiscoveryItemClass(),
+                    new NamedDiscoveryItem(component.getName()));
         }
         for (SonicMQConnection connection : discoveredConnections) {
-        	data.addDiscoveryItem(DiscoveryItemClass.Connection, 
-        			new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getName(), 
-        					connection.getHost(), connection.getUser()));
+            if (connection.getId() != null) {
+                data.addDiscoveryItem(DiscoveryItemClass.Connection,
+                        new ConnectionDiscoveryItem(connection.getBroker().getName(), connection.getId(),
+                                connection.getName(), connection.getHost(), connection.getUser()));
+            } else {
+                logger.warn("Cannot collect connection for user {} from {} due to missing identifier.",
+                        connection.getUser(), connection.getHost());
+            }
         }
         for (SonicMQQueue queue : discoveredQueues) {
-        	data.addDiscoveryItem(DiscoveryItemClass.Queue, 
-        			new QueueDiscoveryItem(queue.getBroker().getName(), queue.getName()));
+            data.addDiscoveryItem(DiscoveryItemClass.Queue,
+                    new QueueDiscoveryItem(queue.getBroker().getName(), queue.getName()));
         }
         for (SonicMQSubscriber subscriber : discoveredSubscribers) {
-        	data.addDiscoveryItem(DiscoveryItemClass.Subscriber,
-        			new SubscriberDiscoveryItem(subscriber.getConnectionName(), subscriber.getTopic(), subscriber.getHost(), subscriber.getUser()));
+            data.addDiscoveryItem(DiscoveryItemClass.Subscriber,
+                    new SubscriberDiscoveryItem(subscriber.getBroker(), subscriber.getConnectionId(),
+                            subscriber.getTopicId(), subscriber.getTopic(), subscriber.getHost(),
+                            subscriber.getUser()));
         }
     }
 
@@ -191,20 +208,17 @@ public class SonicMQMonitor implements Closeable {
         for (ISonicMQComponent component : discoveredComponents) {
             if (component.getType() == ComponentType.BROKER) {
                 IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
-                for (IConnectionData c : getAllConnections(proxy)) {
-                    IConnectionData conn = (IConnectionData) c;
-                    long ref = conn.getConnectionMemberRef();
-                    long start = System.currentTimeMillis();
-                    IConnectionMemberInfo memberInfo = proxy.getConnectionMemberDetails(ref).getInfo();
-                    long end = System.currentTimeMillis();
-                    logger.debug("Connection {}", conn.getHost());
-                    logger.debug("Getting member details took {}ms", (end-start));
-                    data.addConnectionData(
-                            component.getName(),
-                            conn.getHost(), 
-                            conn.getUser(),
-                            collectSubscriberData(proxy, ref),
-                            collectConnectionMemberData(proxy, memberInfo));
+                for (IConnectionData conn : getAllConnections(proxy)) {
+                    if (config.isCollectAllConnections() || conn.isApplicationConnection()) {
+                        long ref = conn.getConnectionMemberRef();
+                        IConnectionMemberInfo memberInfo = proxy.getConnectionMemberDetails(ref).getInfo();
+                        data.addConnectionData(
+                                component.getName(),
+                                conn.getHost(), 
+                                conn.getUser(),
+                                collectSubscriberData(proxy, ref),
+                                collectConnectionMemberData(proxy, getConnectionTree(proxy, ref)));
+                    }
                 }
             }
         }
@@ -222,7 +236,7 @@ public class SonicMQMonitor implements Closeable {
      * @return Domain
      */
     public String getDomain() {
-        return domain;
+        return config.getDomain();
     }
     
     /**
@@ -256,14 +270,14 @@ public class SonicMQMonitor implements Closeable {
      * @param memberRefs Member refs
      * @return List of connection members' collected data
      */
-    private List<ConnectionMemberData> collectConnectionMemberData(IBrokerProxy proxy, IConnectionMemberInfo info) {
-    	long start = System.currentTimeMillis();
+    private List<ConnectionMemberData> collectConnectionMemberData(IBrokerProxy proxy, IConnectionTreeNode node) {
         List<ConnectionMemberData> memberDataList = new ArrayList<ConnectionMemberData>();
-        for (IConnectionMemberDetails memberDetails : getChildConnectionMemberDetails(proxy, info)) {
-            IConnectionMemberInfo memberInfo = memberDetails.getInfo();
+        for (IConnectionTreeNode childNode : getConnectionTreeNodeChildren(node)) {
+            IConnectionMemberInfo memberInfo = childNode.getInfo();
+            IConnectionMemberDetails memberDetails = proxy.getConnectionMemberDetails(memberInfo.getRef());
             
             ConnectionMemberData memberData = 
-                    new ConnectionMemberData(collectConnectionMemberData(proxy, memberInfo));
+                    new ConnectionMemberData(collectConnectionMemberData(proxy, childNode));
             
             memberData.addAttribute(CONNECTION_MEMBER_STATE, memberDetails.getStateString());
             memberData.addAttribute(CONNECTION_MEMBER_TYPE, memberInfo.getTypeString());
@@ -274,8 +288,6 @@ public class SonicMQMonitor implements Closeable {
             }
             memberDataList.add(memberData);
         }
-    	long end = System.currentTimeMillis();
-    	logger.debug("Collecting connection data took {}ms", (end-start));
         return memberDataList;
     }
     

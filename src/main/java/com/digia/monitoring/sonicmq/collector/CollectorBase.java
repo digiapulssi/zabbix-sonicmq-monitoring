@@ -17,13 +17,16 @@ public class CollectorBase implements ICollector {
             SonicMQMonitoringData data) {
         switch (component.getType()) {
         case AGENT:
-            collectAgentData(clientProxyFactory.getAgentProxy(component.getJmxName()), component.getName(), data);
+        	IAgentProxy agentProxy = clientProxyFactory.getAgentProxy(component.getJmxName());
+            collectAgentData(agentProxy, component.getName(), data);
             break;
         case AGENT_MANAGER:
-            collectAgentManagerData(clientProxyFactory.getAgentManagerProxy(component.getJmxName()), component.getName(), data);
+        	IAgentManagerProxy agentManagerProxy = clientProxyFactory.getAgentManagerProxy(component.getJmxName());
+            collectAgentManagerData(agentManagerProxy, component.getName(), data);
             break;
         case BROKER:
-            collectBrokerData(clientProxyFactory.getBrokerProxy(component.getJmxName()), component.getName(), data);
+        	IBrokerProxy brokerProxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
+            collectBrokerData(brokerProxy, component.getName(), data);
             break;
         }
     }

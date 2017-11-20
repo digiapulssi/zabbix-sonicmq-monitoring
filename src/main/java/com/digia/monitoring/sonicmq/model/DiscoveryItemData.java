@@ -9,38 +9,46 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class DiscoveryItemData {
-	
-	private DiscoveryItemDataMap items;
-	private Map<String,Object> data = new LinkedHashMap<String,Object>();
-	
-	public void setValue(String key, Object value) {
-		data.put(key, value);
-	}
-	
-    @JsonInclude(value=Include.NON_NULL)
-	public Map<String, Object> getData() {
-		return Collections.unmodifiableMap(data);
-	}
-	
-    @JsonInclude(value=Include.NON_NULL)
-	public DiscoveryItemDataMap getItems() {
-		return items;
-	}
-	
-	public DiscoveryItemData getItemData(DiscoveryItemClass itemClass, String discoveryItemName) {
-		if (items == null) {
-			items = new DiscoveryItemDataMap();
-		}
-		Map<String,DiscoveryItemData> classMap = items.get(itemClass);
-		if (classMap == null) {
-			classMap = new LinkedHashMap<String,DiscoveryItemData>();
-			items.put(itemClass, classMap);
-		}
-		DiscoveryItemData data = classMap.get(discoveryItemName);
-		if (data == null) {
-			data = new DiscoveryItemData();
-			classMap.put(discoveryItemName, data);
-		}
-		return data;
-	}
+
+    private DiscoveryItemDataMap items;
+    private Map<String, Object> data = new LinkedHashMap<String, Object>();
+
+    public void setData(String key, Object value) {
+        data.put(key, value);
+    }
+    
+    public Object getData(String key) {
+        return data.get(key);
+    }
+    
+    public boolean containsData(String key) {
+        return data.containsKey(key);
+    }
+
+    @JsonInclude(value = Include.NON_NULL)
+    public Map<String, Object> getData() {
+        return Collections.unmodifiableMap(data);
+    }
+
+    @JsonInclude(value = Include.NON_NULL)
+    public DiscoveryItemDataMap getItems() {
+        return items;
+    }
+
+    public DiscoveryItemData getItemData(DiscoveryItemClass itemClass, String discoveryItemName) {
+        if (items == null) {
+            items = new DiscoveryItemDataMap();
+        }
+        Map<String, DiscoveryItemData> classMap = items.get(itemClass);
+        if (classMap == null) {
+            classMap = new LinkedHashMap<String, DiscoveryItemData>();
+            items.put(itemClass, classMap);
+        }
+        DiscoveryItemData data = classMap.get(discoveryItemName);
+        if (data == null) {
+            data = new DiscoveryItemData();
+            classMap.put(discoveryItemName, data);
+        }
+        return data;
+    }
 }

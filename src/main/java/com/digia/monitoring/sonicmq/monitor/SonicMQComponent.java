@@ -3,6 +3,8 @@ package com.digia.monitoring.sonicmq.monitor;
 import com.digia.monitoring.sonicmq.ComponentType;
 import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.sonicsw.mf.common.runtime.IComponentIdentity;
+import com.sonicsw.mf.common.runtime.IComponentState;
+import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.common.runtime.IIdentity;
 import com.sonicsw.mf.common.runtime.IState;
 
@@ -22,6 +24,12 @@ public class SonicMQComponent implements ISonicMQComponent {
     
     /** Name of container containing the component. */
     private String containerName;
+    
+    /** True if component is online. */
+    private boolean online;
+    
+    /** Component's last discovered state. */
+    private String state;
 
     /**
      * Creates new SonicMQComponent.
@@ -32,6 +40,8 @@ public class SonicMQComponent implements ISonicMQComponent {
         jmxName = identity.getCanonicalName();
         type = ComponentType.fromIdentity(identity);
         containerName = identity.getContainerName();
+        online = resolveComponentState(state);
+        this.state = state.getStateString();
         if (type == ComponentType.BROKER) {
             name = ((IComponentIdentity) identity).getComponentName();
         } else {
@@ -39,35 +49,37 @@ public class SonicMQComponent implements ISonicMQComponent {
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.ISonicMQComponent#getJmxName()
-     */
-    @Override
+    private boolean resolveComponentState(IState state) {
+    	if (state instanceof IComponentState && state.getState() == IComponentState.STATE_ONLINE) {
+    		return true;
+    	}
+    	if (state instanceof IContainerState && state.getState() == IContainerState.STATE_ONLINE) {
+    		return true;
+    	}
+    	return false;
+    }
+    
     public String getJmxName() {
         return jmxName;
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.ISonicMQComponent#getType()
-     */
-    @Override
     public ComponentType getType() {
         return type;
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.ISonicMQComponent#getName()
-     */
-    @Override
     public String getName() {
         return name;
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.ISonicMQComponent#getContainerName()
-     */
-    @Override
     public String getContainerName() {
         return containerName;
     }
+    
+    public String getState() {
+		return state;
+	}
+    
+    public boolean isOnline() {
+		return online;
+	}
 }
