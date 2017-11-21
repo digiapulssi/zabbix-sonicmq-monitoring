@@ -11,11 +11,12 @@ cd $(dirname $0)
 # Load environment
 . ./sonicmq_env.sh
 
-# Check update
-./sonicmq_update_stats.sh
+function sonicmq_get_stat {
+	cat $SMQ_MON_OUTPUT_FILE | \
+	jq '.data.Broker[].items.Connection[]
+		| select(.data["connection.Host"] == "'$HOST'" and .data["connection.User"] == "'$USER'")
+	  | .data["'$ITEM'"]' | \
+	jq -s 'add'
+}
 
-cat $SMQ_MON_OUTPUT_FILE | \
-jq '.data.Broker[].items.Connection[]
-	| select(.data["connection.Host"] == "'$HOST'" and .data["connection.User"] == "'$USER'")
-  | .data["'$ITEM'"]' | \
-jq -s add
+sonicmq_fetch_stat

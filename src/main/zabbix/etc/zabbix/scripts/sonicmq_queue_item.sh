@@ -11,7 +11,8 @@ cd $(dirname $0)
 # Load environment
 . ./sonicmq_env.sh
 
-# Check update
-./sonicmq_update_stats.sh
+function sonicmq_get_stat {
+  cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker['$BROKER'].items.Queue["'$CONNECTION'"].data["'$ITEM'"] // empty'
+}
 
-cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker['$BROKER'].items.Queue["'$CONNECTION'"].data["'$ITEM'"] // empty'
+sonicmq_fetch_stat

@@ -8,6 +8,6 @@
 		"com.digia.monitoring.sonicmq.collector.AgentCollector",
 		"com.digia.monitoring.sonicmq.collector.AgentManagerCollector",
 		"com.digia.monitoring.sonicmq.collector.BrokerCollector",
-        "com.digia.monitoring.sonicmq.collector.SubscriberCollector"
+		"com.digia.monitoring.sonicmq.collector.SubscriberCollector"
 	]
 }
