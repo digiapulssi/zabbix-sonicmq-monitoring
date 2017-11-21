@@ -2,25 +2,18 @@
 
 <assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-	<id>release</id>
+	<id>scripts</id>
 	<formats>
  		<format>tar.gz</format>
 	</formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
-		<fileSet>
-			<includes>
-				<include>zabbix-sonicmq-monitoring.jar</include>
-			</includes>
-      <fileMode>0640</fileMode>
-			<directory>target</directory>
- 			<outputDirectory></outputDirectory>
-		</fileSet>
  		<fileSet>
-			<includes>
-				<include>collect-stats.sh</include>
-        <include>config-sample.json</include>
-			</includes>
- 			<directory>src/main/scripts</directory>
+ 			<directory>src/main/zabbix/etc/zabbix</directory>
+      <includes>
+        <include>scripts/*</include>
+        <include>conf.d/*</include>
+      </includes>
  			<outputDirectory></outputDirectory>
 		</fileSet>
  	</fileSets>
