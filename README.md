@@ -8,7 +8,7 @@ extension module (GitHub: https://github.com/Appdynamics/sonicmq-monitoring-exte
 
 ### Requirements ###
 
-1. Java 1.7 or later
+1. Java 1.7 SDK or later
 2. Maven 3
 3. SonicMQ jar packages for desired version, at SonicMQ version 8.5.1 list of jar packages is:
    * broker.jar
@@ -30,7 +30,11 @@ The build produces tar.gz binary packages in /target directory.
 
 ## Installation ##
 
-Target machine should have zabbix agent pre-installed.
+Target machine should have the following pre-installed:
+* SonicMQ client libraries listed above
+* Java 1.7 JRE or later
+* Zabbix agent
+* jq
 
 1. Copy the zabbix-sonicmq-monitoring-release.tar.gz, zabbix-sonicmq-monitoring-scripts.tar.gz and install.sh from release into target machine.
 2. Run install.sh as root and give install path for monitor application and path to SonicMQ client jars when prompted.
@@ -48,14 +52,14 @@ By default, Zabbix scripts run the monitor application if the output data is
 older than 2 minutes (120s). This can be modified by editing
 SMQ_MON_OUTPUT_MAX_AGE value in /etc/zabbix/scripts/sonicmq_env.sh.
 
-Alternatively you can change SMQ_MON_CRON_MODE into 1 to disable running monitor
-from Zabbix scripts and configure script /etc/zabbix/scripts/sonicmq_update_stats.sh
-to run from cron job instead. In this mode, SMQ_MON_OUTPUT_MAX_AGE should also
-be set to 0 (i.e. run always) to make monitor running fully controlled by cron
-timing.
+Alternatively you can change SMQ_MON_CRON_MODE in same file to 1 to disable
+running monitor from Zabbix scripts and configure script
+/etc/zabbix/scripts/sonicmq_update_stats.sh to run from cron job instead. In
+this mode, SMQ_MON_OUTPUT_MAX_AGE should also be set to 0 (i.e. run always) to
+make monitor running fully controlled by cron timing.
 
 Suitable command for running from cron is:
-`. /etc/zabbix/scripts/sonicmq_env.sh && /etc/zabbix/scripts/sonicmq_update_stats.sh`
+`. /etc/zabbix/scripts/sonicmq_env.sh && . /etc/zabbix/scripts/sonicmq_update_stats.sh`
 
 ### Monitor Logging ###
 

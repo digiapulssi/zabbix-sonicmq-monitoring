@@ -23,7 +23,16 @@ SMQ_MON_CRON_MODE=0
 # Define either absolute path or special value "syslog" to redirect to syslog
 SMQ_MON_LOG=syslog
 
-echo $SMQ_MON_LOG
+function sonicmq_get_lock {
+  # Obtain file lock
+  lock=/tmp/$(basename $0).lock
+  exec 200>$lock
+  flock -w $SMQ_MON_OUTPUT_MAX_AGE 200
+
+  # Set pid
+  pid=$$
+  echo $pid 1>&200
+}
 
 # Function providing common fetch logic around script specific logic parsing the output
 function sonicmq_fetch_stat {
@@ -33,6 +42,8 @@ function sonicmq_fetch_stat {
     else
     	. ./sonicmq_update_stats.sh 2>&1 >>$SMQ_MON_LOG
     fi
+  else
+    sonicmq_get_lock
   fi
 
   if [ -e $SMQ_MON_OUTPUT_FILE ]; then
