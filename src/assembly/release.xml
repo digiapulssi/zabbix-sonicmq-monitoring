@@ -9,7 +9,7 @@
 	<fileSets>
 		<fileSet>
 			<includes>
-				<include>zabbix-sonicmq-monitoring.jar</include>
+				<include>zabbix-sonicmq-monitoring-${project.version}.jar</include>
 			</includes>
       <fileMode>0640</fileMode>
 			<directory>target</directory>
