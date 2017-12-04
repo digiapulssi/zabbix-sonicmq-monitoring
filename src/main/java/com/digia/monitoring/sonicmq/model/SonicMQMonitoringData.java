@@ -58,6 +58,7 @@ public class SonicMQMonitoringData {
      * Adds new discovery item.
      * @param itemClass Discovery item type
      * @param item Discovery item
+     * @param <T> Type of discovery item
      */
     public <T> void addDiscoveryItem(DiscoveryItemClass itemClass, T item) {
         if (discovery == null) {

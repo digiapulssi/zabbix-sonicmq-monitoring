@@ -148,6 +148,11 @@ public class SonicUtil {
         }
     }
     
+    /**
+     * Returns identifier for connection
+     * @param connection Connection
+     * @return Connection identifier
+     */
     public static String getIdentifier(IConnectionData connection) {
     	if (connection.getConnectID() != null) {
     		return sha1hex(connection.getConnectID());
@@ -159,7 +164,7 @@ public class SonicUtil {
 	/**
 	 * Returns identifier for subscriber.
 	 * @param subscriberData Subscriber
-	 * @return
+	 * @return Identifier for subscriber
 	 */
 	public static String getIdentifier(ISubscriberData subscriberData) {
 		return sha1hex(subscriberData.getTopicName());

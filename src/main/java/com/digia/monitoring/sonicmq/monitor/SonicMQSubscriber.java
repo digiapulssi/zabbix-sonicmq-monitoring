@@ -30,6 +30,7 @@ public class SonicMQSubscriber {
 	
 	/**
 	 * Creates new SonicMQSubscriber.
+	 * @param broker Connection broker
 	 * @param connection Connection data of subscription
 	 * @param subscriber Subscriber data of subscription
 	 */

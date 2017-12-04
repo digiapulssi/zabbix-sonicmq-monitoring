@@ -14,6 +14,7 @@ public class CollectorFactory {
      * class should have accessible no-arg constructor.
      * @param collectorName Collector name
      * @return Collector instance
+     * @throws SonicMQMonitoringException Thrown if creating collector instance fails
      */
     public static ICollector createCollector(String collectorName) throws SonicMQMonitoringException {
         try {

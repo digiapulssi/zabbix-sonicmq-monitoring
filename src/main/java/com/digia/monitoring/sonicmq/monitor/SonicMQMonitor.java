@@ -79,6 +79,7 @@ public class SonicMQMonitor implements Closeable {
     /**
      * Creates new SonicMQMonitor with given monitor configuration.
      * @param config Monitor configuration
+     * @throws SonicMQMonitoringException Thrown if creating monitor instance fails
      */
     public SonicMQMonitor(SonicMQMonitorConfiguration config) throws SonicMQMonitoringException {
         clientProxyFactory = new ClientProxyFactory(config.getLocation(), config.getUsername(), config.getPassword(), config.getTimeout());
@@ -211,7 +212,6 @@ public class SonicMQMonitor implements Closeable {
                 for (IConnectionData conn : getAllConnections(proxy)) {
                     if (config.isCollectAllConnections() || conn.isApplicationConnection()) {
                         long ref = conn.getConnectionMemberRef();
-                        IConnectionMemberInfo memberInfo = proxy.getConnectionMemberDetails(ref).getInfo();
                         data.addConnectionData(
                                 component.getName(),
                                 conn.getHost(), 

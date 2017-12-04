@@ -3,9 +3,9 @@ package com.digia.monitoring.sonicmq;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 
 /**
- * Defines interface for data collectors invoked from {@link SonicMQMonitor}.
+ * Defines interface for data collectors invoked from {@link com.digia.monitoring.sonicmq.monitor.SonicMQMonitor}.
  * @author Sami Pajunen
- * @see SonicMQMonitor
+ * @see com.digia.monitoring.sonicmq.monitor.SonicMQMonitor
  */
 public interface ICollector {
     /**
