@@ -1,22 +1,24 @@
 #!/bin/bash
 set -e
 
+VERSION=${project.version}
+
 # Configuration properties
 read -p "Enter monitor application install location (default /opt): " input
 MONITOR_INSTALL_DIRECTORY=${input:-/opt}
 
 read -p "Enter SonicMQ client jar path: " SONICMQ_JAR_PATH
 
-SMQ_MON_INSTALL_PATH=$MONITOR_INSTALL_DIRECTORY/zabbix-sonicmq-monitoring
+SMQ_MON_INSTALL_PATH=$MONITOR_INSTALL_DIRECTORY/zabbix-sonicmq-monitoring-$VERSION
 
 # Unpack monitor
-tar xzf zabbix-sonicmq-monitoring-release.tar.gz -C $MONITOR_INSTALL_DIRECTORY
+tar xzf zabbix-sonicmq-monitoring-$VERSION-release.tar.gz -C $MONITOR_INSTALL_DIRECTORY
 cp -p $SMQ_MON_INSTALL_PATH/config-sample.json $SMQ_MON_INSTALL_PATH/config.json
 chown -R root:zabbix $SMQ_MON_INSTALL_PATH
 
 # Unpack Zabbix scripts
 mkdir -p /etc/zabbix
-tar xzf zabbix-sonicmq-monitoring-scripts.tar.gz -C /etc/zabbix
+tar xzf zabbix-sonicmq-monitoring-$VERSION-scripts.tar.gz -C /etc/zabbix
 chown root:zabbix /etc/zabbix/scripts/sonicmq*.sh
 chown root:zabbix /etc/zabbix/conf.d/sonicmq-monitoring.conf
 
