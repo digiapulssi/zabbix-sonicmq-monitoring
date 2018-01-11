@@ -20,7 +20,7 @@ chown -R root:zabbix $SMQ_MON_INSTALL_PATH
 mkdir -p /etc/zabbix
 tar xzf zabbix-sonicmq-monitoring-$VERSION-scripts.tar.gz -C /etc/zabbix
 chown root:zabbix /etc/zabbix/scripts/sonicmq*.sh
-chown root:zabbix /etc/zabbix/conf.d/sonicmq-monitoring.conf
+chown root:zabbix /etc/zabbix/zabbix_agentd.d/sonicmq-monitoring.conf
 
 sed -i "s|^SONICMQ_JAR_PATH=.*$|SONICMQ_JAR_PATH=$SONICMQ_JAR_PATH|" /etc/zabbix/scripts/sonicmq_env.sh
 sed -i "s|^SMQ_MON_INSTALL_PATH=.*$|SMQ_MON_INSTALL_PATH=$SMQ_MON_INSTALL_PATH|" /etc/zabbix/scripts/sonicmq_env.sh
