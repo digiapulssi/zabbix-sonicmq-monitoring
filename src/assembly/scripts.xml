@@ -12,7 +12,7 @@
  			<directory>src/main/zabbix/etc/zabbix</directory>
       <includes>
         <include>scripts/*</include>
-        <include>conf.d/*</include>
+        <include>zabbix_agentd.d/*</include>
       </includes>
  			<outputDirectory></outputDirectory>
 		</fileSet>

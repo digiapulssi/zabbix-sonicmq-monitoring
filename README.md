@@ -26,7 +26,7 @@ extension module (GitHub: https://github.com/Appdynamics/sonicmq-monitoring-exte
 2. Update the sonicmq.version property in pom.xml if necessary
 3. Build: `mvn clean install assembly:single`
 
-The build produces tar.gz binary packages in /target directory.
+The build produces tar.gz binary packages and install.sh in /target directory.
 
 ## Installation ##
 
@@ -36,9 +36,9 @@ Target machine should have the following pre-installed:
 * Zabbix agent
 * jq
 
-1. Copy the zabbix-sonicmq-monitoring-release.tar.gz, zabbix-sonicmq-monitoring-scripts.tar.gz and install.sh from release into target machine.
+1. Copy the zabbix-sonicmq-monitoring-<version>-release.tar.gz, zabbix-sonicmq-monitoring-<version>-scripts.tar.gz and install.sh from release into target machine.
 2. Run install.sh as root and give install path for monitor application and path to SonicMQ client jars when prompted.
-3. Configure SonicMQ connection properties in <monitor-install-path>/zabbix-sonicmq-monitoring/config.json.
+3. Configure SonicMQ connection properties in <monitor-install-path>/zabbix-sonicmq-monitoring-<version>/config.json.
 
 Script installs both monitor application and Zabbix scripts and configuration.
 Zabbix scripts and configuration are installed according to preferred agent
