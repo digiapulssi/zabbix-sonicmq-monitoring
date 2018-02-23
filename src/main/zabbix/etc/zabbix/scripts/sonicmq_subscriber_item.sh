@@ -13,7 +13,7 @@ cd $(dirname $0)
 . ./sonicmq_env.sh
 
 function sonicmq_get_stat {
-  cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker["'$BROKER'"].items.Connection["'$CONNECTION'"].items.Subscriber['$SUBSCRIBER'].data["'$ITEM'"] // empty'
+  cat $SMQ_MON_OUTPUT_FILE | jq '.data.Broker["'$BROKER'"].items.Connection["'$CONNECTION'"].items.TopicSubscription['$SUBSCRIBER'].data["'$ITEM'"] // empty'
 }
 
 sonicmq_fetch_stat
