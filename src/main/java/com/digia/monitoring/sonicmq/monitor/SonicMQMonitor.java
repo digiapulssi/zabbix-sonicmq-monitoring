@@ -20,7 +20,7 @@ import com.digia.monitoring.sonicmq.model.NamedDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.QueueDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 import com.digia.monitoring.sonicmq.model.SubscriberData;
-import com.digia.monitoring.sonicmq.model.SubscriberDiscoveryItem;
+import com.digia.monitoring.sonicmq.model.TopicSubscriptionDiscoveryItem;
 import com.sonicsw.mf.common.runtime.IComponentState;
 import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.common.runtime.IState;
@@ -60,7 +60,7 @@ public class SonicMQMonitor implements Closeable {
             "com.digia.monitoring.sonicmq.collector.AgentCollector",
             "com.digia.monitoring.sonicmq.collector.AgentManagerCollector",
             "com.digia.monitoring.sonicmq.collector.BrokerCollector",
-            "com.digia.monitoring.sonicmq.collector.SubscriberCollector"
+            "com.digia.monitoring.sonicmq.collector.TopicSubscriptionCollector"
     };
 
     private Logger logger = LoggerFactory.getLogger(SonicMQMonitor.class);
@@ -144,8 +144,10 @@ public class SonicMQMonitor implements Closeable {
             if (component.getType() == ComponentType.BROKER) {
                 IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
                 for (IQueueData queueData : getAllQueues(proxy)) {
-                    SonicMQQueue queue = new SonicMQQueue(component, queueData);
-                    discoveredQueues.add(queue);
+                    if (!queueData.isTemporaryQueue()) {
+                        SonicMQQueue queue = new SonicMQQueue(component, queueData);
+                        discoveredQueues.add(queue);
+                    }
                 }
             }
         }
@@ -194,8 +196,8 @@ public class SonicMQMonitor implements Closeable {
                     new QueueDiscoveryItem(queue.getBroker().getName(), queue.getName()));
         }
         for (SonicMQSubscriber subscriber : discoveredSubscribers) {
-            data.addDiscoveryItem(DiscoveryItemClass.Subscriber,
-                    new SubscriberDiscoveryItem(subscriber.getBroker(), subscriber.getConnectionId(),
+            data.addDiscoveryItem(DiscoveryItemClass.TopicSubscription,
+                    new TopicSubscriptionDiscoveryItem(subscriber.getBroker(), subscriber.getConnectionId(),
                             subscriber.getTopicId(), subscriber.getTopic(), subscriber.getHost(),
                             subscriber.getUser()));
         }
@@ -276,17 +278,19 @@ public class SonicMQMonitor implements Closeable {
             IConnectionMemberInfo memberInfo = childNode.getInfo();
             IConnectionMemberDetails memberDetails = proxy.getConnectionMemberDetails(memberInfo.getRef());
             
-            ConnectionMemberData memberData = 
-                    new ConnectionMemberData(collectConnectionMemberData(proxy, childNode));
-            
-            memberData.addAttribute(CONNECTION_MEMBER_STATE, memberDetails.getStateString());
-            memberData.addAttribute(CONNECTION_MEMBER_TYPE, memberInfo.getTypeString());
-            
-            String destinationName = getDestinationName(memberDetails);
-            if (destinationName != null) {
-                memberData.addAttribute(CONNECTION_MEMBER_DESTINATION, destinationName);
+            if (memberDetails != null) {
+                ConnectionMemberData memberData = 
+                        new ConnectionMemberData(collectConnectionMemberData(proxy, childNode));
+                
+                memberData.addAttribute(CONNECTION_MEMBER_STATE, memberDetails.getStateString());
+                memberData.addAttribute(CONNECTION_MEMBER_TYPE, memberInfo.getTypeString());
+                
+                String destinationName = getDestinationName(memberDetails);
+                if (destinationName != null) {
+                    memberData.addAttribute(CONNECTION_MEMBER_DESTINATION, destinationName);
+                }
+                memberDataList.add(memberData);
             }
-            memberDataList.add(memberData);
         }
         return memberDataList;
     }

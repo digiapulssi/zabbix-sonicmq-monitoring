@@ -18,4 +18,23 @@ public class NamedDiscoveryItem {
     public String getName() {
         return name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        
+        if (obj.getClass() == getClass()) {
+            String name = ((NamedDiscoveryItem) obj).name;
+            return this.name != null ? this.name.equals(name) : name == null;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
+    }
 }

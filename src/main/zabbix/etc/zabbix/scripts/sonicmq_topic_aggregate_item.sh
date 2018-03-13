@@ -5,7 +5,8 @@ set -e
 
 HOST=$1
 USER=$2
-ITEM=$3
+TOPIC=$3
+ITEM=$4
 
 cd $(dirname $0)
 
@@ -16,8 +17,9 @@ function sonicmq_get_stat {
 	cat $SMQ_MON_OUTPUT_FILE | \
 	jq '.data.Broker[].items.Connection[]
 		| select(.data["connection.Host"] == "'$HOST'" and .data["connection.User"] == "'$USER'")
-	  | .data["'$ITEM'"]' | \
-	jq -s 'add'
+		| .items.TopicSubscription["'$TOPIC'"] // empty
+	  | [.data["'$ITEM'"]]
+		| max'
 }
 
 sonicmq_fetch_stat
