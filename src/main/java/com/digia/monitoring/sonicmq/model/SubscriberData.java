@@ -3,7 +3,7 @@ package com.digia.monitoring.sonicmq.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Model for SonicMQ subscriber data.
+ * Model for SonicMQ topic data.
  * @author Sami Pajunen
  */
 public class SubscriberData {

@@ -98,7 +98,7 @@ public class SonicUtil {
 	 * 
 	 * @param proxy Proxy
 	 * @param memberRef Member reference
-	 * @return Connection tree
+	 * @return Connection tree or null if connection no longer exists
 	 */
 	public static IConnectionTreeNode getConnectionTree(IBrokerProxy proxy, Long memberRef) {
 		ArrayList<Long> list = new ArrayList<Long>();
@@ -106,18 +106,20 @@ public class SonicUtil {
 		return (IConnectionTreeNode) proxy.getConnectionTree(list, MAX_TREE_DEPTH).get(0);
 	}
 
-	/**
-	 * Retrieves connection tree node children handling no-children case more gracefully.
-	 * @param node Connection tree node
-	 * @return Child list, empty list if node has no children
-	 */
-	public static List<IConnectionTreeNode> getConnectionTreeNodeChildren(IConnectionTreeNode node) {
-		List<IConnectionTreeNode> children = node.getChildren();
-		if (children != null) {
-			return children;
-		}
-		return Collections.emptyList();
-	}
+    /**
+     * Retrieves connection tree node children handling no-children case more gracefully.
+     * @param node Connection tree node
+     * @return Child list, empty list if node has no children or null node is given
+     */
+    public static List<IConnectionTreeNode> getConnectionTreeNodeChildren(IConnectionTreeNode node) {
+        if (node != null) {
+            List<IConnectionTreeNode> children = node.getChildren();
+            if (children != null) {
+                return children;
+            }
+        }
+        return Collections.emptyList();
+    }
 	
     /**
      * <p>Attempts to resolve JMS destination name from connection member details.</p>

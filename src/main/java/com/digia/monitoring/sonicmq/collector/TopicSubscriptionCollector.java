@@ -13,12 +13,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Collector implementation for collecting connection/subscriber information.
+ * <p>Collector implementation for collecting topic subscription information.</p>
+ * 
+ * <p>Collects largest message count and size for connection and topic name.</p>
+ * 
  * @author Sami Pajunen
  */
-public class SubscriberCollector extends CollectorBase {
+public class TopicSubscriptionCollector extends CollectorBase {
 
-    private Logger logger = LoggerFactory.getLogger(SubscriberCollector.class);
+    private Logger logger = LoggerFactory.getLogger(TopicSubscriptionCollector.class);
+    
+    private static final String TOPICSUBSCRIPTION_MESSAGECOUNT = "topicsubscription.MessageCount";
+    private static final String TOPICSUBSCRIPTION_MESSAGESIZE = "topicsubscription.MessageSize";
 
     @Override
     protected void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
@@ -29,17 +35,16 @@ public class SubscriberCollector extends CollectorBase {
             if (connectionKey != null) {
                 DiscoveryItemData connectionData = brokerData.getItemData(DiscoveryItemClass.Connection, connectionKey);
                 for (ISubscriberData subscriber : getSubscribers(proxy, connection)) {
-                    DiscoveryItemData subscriberData = connectionData.getItemData(DiscoveryItemClass.Subscriber,
+                    DiscoveryItemData subscriberData = connectionData.getItemData(DiscoveryItemClass.TopicSubscription,
                             getIdentifier(subscriber));
-                    subscriberData.setData("subscriber.TopicName", subscriber.getTopicName());
-                    subscriberData.setData("subscriber.SubscriptionName", subscriber.getSubscriptionName());
-                    subscriberData.setData("subscriber.MessageCount", subscriber.getMessageCount());
-                    subscriberData.setData("subscriber.MessageSize", subscriber.getMessageSize());
-                    subscriberData.setData("subscriber.IsDurable", subscriber.isDurable());
-                    subscriberData.setData("subscriber.IsConnectionConsumer", subscriber.isConnectionConsumer());
+                    Long messageCount = (Long) subscriberData.getData(TOPICSUBSCRIPTION_MESSAGECOUNT);
+                    if (messageCount == null || messageCount < subscriber.getMessageCount()) {
+                        subscriberData.setData(TOPICSUBSCRIPTION_MESSAGECOUNT, subscriber.getMessageCount());
+                        subscriberData.setData(TOPICSUBSCRIPTION_MESSAGESIZE, subscriber.getMessageSize());
+                    }
                 }
             } else {
-                logger.warn("Cannot collect connection subscribers due to missing connection ID. User={}, Host={}",
+                logger.warn("Cannot collect topic subscription information due to missing connection ID. User={}, Host={}",
                         connection.getUser(), connection.getHost());
             }
         }
