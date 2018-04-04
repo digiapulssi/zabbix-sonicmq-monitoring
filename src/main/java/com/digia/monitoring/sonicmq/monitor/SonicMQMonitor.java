@@ -16,11 +16,13 @@ import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.SonicMQMonitoringException;
 import com.digia.monitoring.sonicmq.model.ConnectionDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.ConnectionMemberData;
+import com.digia.monitoring.sonicmq.model.DiscoveryItemData;
 import com.digia.monitoring.sonicmq.model.NamedDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.QueueDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 import com.digia.monitoring.sonicmq.model.SubscriberData;
 import com.digia.monitoring.sonicmq.model.TopicSubscriptionDiscoveryItem;
+import com.sonicsw.ma.mgmtapi.config.MgmtException;
 import com.sonicsw.mf.common.runtime.IComponentState;
 import com.sonicsw.mf.common.runtime.IContainerState;
 import com.sonicsw.mf.common.runtime.IState;
@@ -32,9 +34,11 @@ import com.sonicsw.mq.common.runtime.IConnectionMemberInfo;
 import com.sonicsw.mq.common.runtime.IConnectionTreeNode;
 import com.sonicsw.mq.common.runtime.IQueueData;
 import com.sonicsw.mq.common.runtime.ISubscriberData;
+import com.sonicsw.mq.mgmtapi.config.IQueuesBean.IQueueAttributes;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
 
 import static com.digia.monitoring.sonicmq.util.SonicUtil.*;
+import static com.digia.monitoring.sonicmq.util.DigestUtil.*;
 
 /**
  * <p>Provides methods for SonicMQ component discovery and data collection.</p>
@@ -62,6 +66,8 @@ public class SonicMQMonitor implements Closeable {
             "com.digia.monitoring.sonicmq.collector.BrokerCollector",
             "com.digia.monitoring.sonicmq.collector.TopicSubscriptionCollector"
     };
+    
+    private static final String QUEUE_CONFIG_MAX_SIZE = "queue.config.QueueMaxSize";
 
     private Logger logger = LoggerFactory.getLogger(SonicMQMonitor.class);
     
@@ -82,7 +88,7 @@ public class SonicMQMonitor implements Closeable {
      * @throws SonicMQMonitoringException Thrown if creating monitor instance fails
      */
     public SonicMQMonitor(SonicMQMonitorConfiguration config) throws SonicMQMonitoringException {
-        clientProxyFactory = new ClientProxyFactory(config.getLocation(), config.getUsername(), config.getPassword(), config.getTimeout());
+        clientProxyFactory = new ClientProxyFactory(config.getDomain(), config.getLocation(), config.getUsername(), config.getPassword(), config.getTimeout());
         collectors = createCollectors(config.getCollectors());
         this.config = config;
     }
@@ -93,7 +99,7 @@ public class SonicMQMonitor implements Closeable {
      */
     public void discoverComponents() {
         List<SonicMQComponent> discoveredComponents = new ArrayList<SonicMQComponent>();
-        IAgentManagerProxy domainProxy = clientProxyFactory.getDomainLevelAgentManagerProxy(config.getDomain());
+        IAgentManagerProxy domainProxy = clientProxyFactory.getDomainLevelAgentManagerProxy();
         for (IState state : domainProxy.getCollectiveState()) {
             if (state instanceof IContainerState) {
                 for (IComponentState componentState : ((IContainerState) state).getComponentStates()) {
@@ -168,6 +174,21 @@ public class SonicMQMonitor implements Closeable {
                 } catch (ProxyRuntimeException ex) {
                     logger.error("Unable to collect data from component " + component.getName() + ".", ex);
                 }
+            }
+        }
+    }
+    
+    public void collectConfigurationData(SonicMQMonitoringData data) {
+        for (SonicMQQueue queue : discoveredQueues) {
+            try {
+                IQueueAttributes queueAttributes = 
+                    clientProxyFactory.getQueueAttributes(queue.getBroker().getName(), queue.getName());
+                DiscoveryItemData brokerData = data.getItemData(DiscoveryItemClass.Broker, queue.getBroker().getName());
+                DiscoveryItemData queueData = brokerData.getItemData(DiscoveryItemClass.Queue, sha1hex(queue.getName()));
+                
+                queueData.setData(QUEUE_CONFIG_MAX_SIZE, queueAttributes.getQueueMaxSize());
+            } catch (MgmtException ex) {
+                // TODO
             }
         }
     }
