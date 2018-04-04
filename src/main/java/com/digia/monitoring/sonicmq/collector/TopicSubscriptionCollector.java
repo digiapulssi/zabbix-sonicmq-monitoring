@@ -1,6 +1,7 @@
 package com.digia.monitoring.sonicmq.collector;
 
 import com.digia.monitoring.sonicmq.DiscoveryItemClass;
+import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.model.DiscoveryItemData;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 import com.sonicsw.mq.common.runtime.IConnectionData;
@@ -27,25 +28,27 @@ public class TopicSubscriptionCollector extends CollectorBase {
     private static final String TOPICSUBSCRIPTION_MESSAGESIZE = "topicsubscription.MessageSize";
 
     @Override
-    protected void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
-        DiscoveryItemData brokerData = data.getItemData(DiscoveryItemClass.Broker, name);
-
-        for (IConnectionData connection : getAllConnections(proxy)) {
-            String connectionKey = getIdentifier(connection);
-            if (connectionKey != null) {
-                DiscoveryItemData connectionData = brokerData.getItemData(DiscoveryItemClass.Connection, connectionKey);
-                for (ISubscriberData subscriber : getSubscribers(proxy, connection)) {
-                    DiscoveryItemData subscriberData = connectionData.getItemData(DiscoveryItemClass.TopicSubscription,
-                            getIdentifier(subscriber));
-                    Long messageCount = (Long) subscriberData.getData(TOPICSUBSCRIPTION_MESSAGECOUNT);
-                    if (messageCount == null || messageCount < subscriber.getMessageCount()) {
-                        subscriberData.setData(TOPICSUBSCRIPTION_MESSAGECOUNT, subscriber.getMessageCount());
-                        subscriberData.setData(TOPICSUBSCRIPTION_MESSAGESIZE, subscriber.getMessageSize());
+    protected void collectBrokerData(IBrokerProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
+        if (component.isOnline()) {
+            DiscoveryItemData brokerData = data.getItemData(DiscoveryItemClass.Broker, component.getName());
+    
+            for (IConnectionData connection : getAllConnections(proxy)) {
+                String connectionKey = getIdentifier(connection);
+                if (connectionKey != null) {
+                    DiscoveryItemData connectionData = brokerData.getItemData(DiscoveryItemClass.Connection, connectionKey);
+                    for (ISubscriberData subscriber : getSubscribers(proxy, connection)) {
+                        DiscoveryItemData subscriberData = connectionData.getItemData(DiscoveryItemClass.TopicSubscription,
+                                getIdentifier(subscriber));
+                        Long messageCount = (Long) subscriberData.getData(TOPICSUBSCRIPTION_MESSAGECOUNT);
+                        if (messageCount == null || messageCount < subscriber.getMessageCount()) {
+                            subscriberData.setData(TOPICSUBSCRIPTION_MESSAGECOUNT, subscriber.getMessageCount());
+                            subscriberData.setData(TOPICSUBSCRIPTION_MESSAGESIZE, subscriber.getMessageSize());
+                        }
                     }
+                } else {
+                    logger.warn("Cannot collect topic subscription information due to missing connection ID. User={}, Host={}",
+                            connection.getUser(), connection.getHost());
                 }
-            } else {
-                logger.warn("Cannot collect topic subscription information due to missing connection ID. User={}, Host={}",
-                        connection.getUser(), connection.getHost());
             }
         }
     }

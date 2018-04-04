@@ -160,14 +160,12 @@ public class SonicMQMonitor implements Closeable {
      */
     public void collectMetricsData(SonicMQMonitoringData data) {
         for (SonicMQComponent component : discoveredComponents) {
-            if (component.isOnline()) {
-                try {
-                    for (ICollector collector : collectors) {
-                        collector.collectData(clientProxyFactory, component, data);
-                    }
-                } catch (ProxyRuntimeException ex) {
-                    logger.error("Unable to collect data from component " + component.getName() + ".", ex);
+            try {
+                for (ICollector collector : collectors) {
+                    collector.collectData(clientProxyFactory, component, data);
                 }
+            } catch (ProxyRuntimeException ex) {
+                logger.error("Unable to collect data from component " + component.getName() + ".", ex);
             }
         }
     }

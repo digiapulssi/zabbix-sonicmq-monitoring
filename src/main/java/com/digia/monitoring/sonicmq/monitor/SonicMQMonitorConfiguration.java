@@ -72,7 +72,7 @@ public class SonicMQMonitorConfiguration {
     public void setCollectAllConnections(boolean collectAllConnections) {
         this.collectAllConnections = collectAllConnections;
     }
-
+    
     @Override
     public String toString() {
         String password = (this.password != null && !this.password.isEmpty()) ? "<REDACTED>" : "";

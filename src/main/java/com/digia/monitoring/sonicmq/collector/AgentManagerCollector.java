@@ -1,6 +1,7 @@
 package com.digia.monitoring.sonicmq.collector;
 
 import com.digia.monitoring.sonicmq.DiscoveryItemClass;
+import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 import com.sonicsw.mf.common.metrics.IMetric;
 import com.sonicsw.mf.common.metrics.IMetricIdentity;
@@ -18,11 +19,13 @@ public class AgentManagerCollector extends CollectorBase {
             IAgentManagerProxy.SYSTEM_POLLTHREADS_POOLWAITS_METRIC_ID
     };
 
-    public void collectAgentManagerData(IAgentManagerProxy proxy, String name, SonicMQMonitoringData data) {
-        IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
-        IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
-        for (IMetric m : metrics) {
-            data.addData(DiscoveryItemClass.AgentManager, name, m.getMetricIdentity().getAbsoluteName(), m.getValue());
+    public void collectAgentManagerData(IAgentManagerProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
+        if (component.isOnline()) {
+            IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
+            IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
+            for (IMetric m : metrics) {
+                data.addData(DiscoveryItemClass.AgentManager, component.getName(), m.getMetricIdentity().getAbsoluteName(), m.getValue());
+            }
         }
     }
 }
