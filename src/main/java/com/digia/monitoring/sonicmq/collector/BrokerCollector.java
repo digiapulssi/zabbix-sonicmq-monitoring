@@ -3,6 +3,7 @@ package com.digia.monitoring.sonicmq.collector;
 import static com.digia.monitoring.sonicmq.util.DigestUtil.*;
 
 import com.digia.monitoring.sonicmq.DiscoveryItemClass;
+import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.model.ConnectionDiscoveryItem;
 import com.digia.monitoring.sonicmq.model.DiscoveryItemData;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
@@ -51,40 +52,45 @@ public class BrokerCollector extends CollectorBase {
     };
 
     private static final String BROKER_STATE = "broker.State";
+    private static final String BROKER_STATE_NAME = "broker.StateName";
     private static final String BROKER_REPLICATION_STATE = "broker.ReplicationState";
     private static final String BROKER_REPLICATION_TYPE = "broker.ReplicationType";
 
     private static final String CONNECTION_HOST = "connection.Host";
     private static final String CONNECTION_USER = "connection.User";
     
-    public void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
-        DiscoveryItemData itemData = data.getItemData(DiscoveryItemClass.Broker, name);
-
-        data.addData(DiscoveryItemClass.Broker, name, BROKER_STATE, proxy.getStateString());
-        data.addData(DiscoveryItemClass.Broker, name, BROKER_REPLICATION_STATE, proxy.getReplicationStateString());
-        data.addData(DiscoveryItemClass.Broker, name, BROKER_REPLICATION_TYPE, proxy.getReplicationType());
-
-        IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
-        IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
-        for (IMetric m : metrics) {
-            MetricSpecifier specifier = new MetricSpecifier(m.getMetricIdentity(), name);
-            // Add broker metrics directly and other metrics as categorized child of broker
-            // metrics
-            switch (specifier.getItemClass()) {
-            case Broker:
-                itemData.setData(specifier.getMetric(), m.getValue());
-                break;
-            case Connection:
-                DiscoveryItemData connectionData = itemData.getItemData(specifier.getItemClass(), specifier.getEntity());
-                populateConnectionData(connectionData, data.getDiscoveredConnection(specifier.getEntity()));
-                connectionData.setData(specifier.getMetric(), m.getValue());
-                break;
-            case Queue:
-                DiscoveryItemData queueData = itemData.getItemData(specifier.getItemClass(), specifier.getEntity());
-                queueData.setData(specifier.getMetric(), m.getValue());
-                break;
-            default:
-                break;
+    public void collectBrokerData(IBrokerProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
+        String name = component.getName();
+        data.addData(DiscoveryItemClass.Broker, name, BROKER_STATE, String.valueOf(component.getState()));
+        data.addData(DiscoveryItemClass.Broker, name, BROKER_STATE_NAME, component.getStateName());
+        if (component.isOnline()) {
+            DiscoveryItemData itemData = data.getItemData(DiscoveryItemClass.Broker, name);
+    
+            data.addData(DiscoveryItemClass.Broker, name, BROKER_REPLICATION_STATE, proxy.getReplicationStateString());
+            data.addData(DiscoveryItemClass.Broker, name, BROKER_REPLICATION_TYPE, proxy.getReplicationType());
+    
+            IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
+            IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
+            for (IMetric m : metrics) {
+                MetricSpecifier specifier = new MetricSpecifier(m.getMetricIdentity(), name);
+                // Add broker metrics directly and other metrics as categorized child of broker
+                // metrics
+                switch (specifier.getItemClass()) {
+                case Broker:
+                    itemData.setData(specifier.getMetric(), m.getValue());
+                    break;
+                case Connection:
+                    DiscoveryItemData connectionData = itemData.getItemData(specifier.getItemClass(), specifier.getEntity());
+                    populateConnectionData(connectionData, data.getDiscoveredConnection(specifier.getEntity()));
+                    connectionData.setData(specifier.getMetric(), m.getValue());
+                    break;
+                case Queue:
+                    DiscoveryItemData queueData = itemData.getItemData(specifier.getItemClass(), specifier.getEntity());
+                    queueData.setData(specifier.getMetric(), m.getValue());
+                    break;
+                default:
+                    break;
+                }
             }
         }
     }

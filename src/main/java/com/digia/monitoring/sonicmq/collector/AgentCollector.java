@@ -1,6 +1,7 @@
 package com.digia.monitoring.sonicmq.collector;
 
 import com.digia.monitoring.sonicmq.DiscoveryItemClass;
+import com.digia.monitoring.sonicmq.ISonicMQComponent;
 import com.digia.monitoring.sonicmq.model.SonicMQMonitoringData;
 import com.sonicsw.mf.common.metrics.IMetric;
 import com.sonicsw.mf.common.metrics.IMetricIdentity;
@@ -24,13 +25,21 @@ public class AgentCollector extends CollectorBase {
             IAgentProxy.SYSTEM_NOTIFICATIONS_DROPPED_METRIC_ID ,
             IAgentProxy.SYSTEM_NOTIFICATIONS_MAXAWAITINGDISPATCH_METRIC_ID
     };
+    
+    private static final String AGENT_STATE = "agent.State";
+    private static final String AGENT_STATE_NAME = "agent.StateName";
 
-    public void collectAgentData(IAgentProxy proxy, String name, 
+    public void collectAgentData(IAgentProxy proxy, ISonicMQComponent component, 
             SonicMQMonitoringData data) {
-        IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
-        IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
-        for (IMetric m : metrics) {
-            data.addData(DiscoveryItemClass.Agent, name, m.getMetricIdentity().getAbsoluteName(), m.getValue());
+        String name = component.getName();
+        data.addData(DiscoveryItemClass.Agent, name, AGENT_STATE, String.valueOf(component.getState()));
+        data.addData(DiscoveryItemClass.Agent, name, AGENT_STATE_NAME, component.getStateName());
+        if (component.isOnline()) {
+            IMetricIdentity[] activeMetrics = proxy.getActiveMetrics(metricIds);
+            IMetric[] metrics = proxy.getMetricsData(activeMetrics, false).getMetrics();
+            for (IMetric m : metrics) {
+                data.addData(DiscoveryItemClass.Agent, name, m.getMetricIdentity().getAbsoluteName(), m.getValue());
+            }
         }
     }
 

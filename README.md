@@ -88,7 +88,8 @@ All arguments can be left out depending on conditions:
 Item Syntax | Description | Units |
 ----------- | ----------- | ----- |
 sonicmq.broker.discovery | Discover brokers | Provides template variables: {#NAME} |
-sonicmq.broker.state[{#NAME}] | Broker state | String |
+sonicmq.broker.state[{#NAME}] | Broker state | Integer, raw value from SonicMQ |
+sonicmq.broker.state_name[{#NAME}] | Broker state name | String |
 sonicmq.broker.replication_state[{#NAME}] | Broker replication state | String |
 sonicmq.broker.replication_type[{#NAME}] | Broker replication type | String |
 sonicmq.broker.topicdb_size[{#NAME}] | Topic DB size | |
@@ -105,6 +106,8 @@ sonicmq.broker.connections.rejected_m[{#NAME}] | Rejected connections/min | |
 Item Syntax | Description | Units |
 ----------- | ----------- | ----- |
 sonicmq.agent.discovery | Discover agents (containers) | Provides template variables: {#NAME} |
+sonicmq.agent.state[{#NAME}] | Agent state | Integer, raw value from SonicMQ |
+sonicmq.agent.state_name[{#NAME}] | Agent state name | String |
 sonicmq.agent.memory.max_usage[{#NAME}] | Maximum memory usage (bytes) | |
 sonicmq.agent.memory.current_usage[{#NAME}] | Current memory usage (bytes) | |
 sonicmq.agent.threads.pool_waits[{#NAME}] | Thread pool waits | |

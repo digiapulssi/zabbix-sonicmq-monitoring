@@ -34,5 +34,17 @@ public interface ISonicMQComponent {
      * Returns name of component state.
      * @return Component state name
      */
-    String getState();
+    String getStateName();
+    
+    /**
+     * Returns raw component state value.
+     * @return Raw component state
+     */
+    short getState();
+    
+    /**
+     * Returns true if component is online.
+     * @return True if component is online
+     */
+    boolean isOnline();
 }

@@ -28,8 +28,11 @@ public class SonicMQComponent implements ISonicMQComponent {
     /** True if component is online. */
     private boolean online;
     
+    /** Component's last discovered state name. */
+    private String stateName;
+    
     /** Component's last discovered state. */
-    private String state;
+    private short state;
 
     /**
      * Creates new SonicMQComponent.
@@ -41,7 +44,8 @@ public class SonicMQComponent implements ISonicMQComponent {
         type = ComponentType.fromIdentity(identity);
         containerName = identity.getContainerName();
         online = resolveComponentState(state);
-        this.state = state.getStateString();
+        this.stateName = state.getStateString();
+        this.state = state.getState();
         if (type == ComponentType.BROKER) {
             name = ((IComponentIdentity) identity).getComponentName();
         } else {
@@ -75,9 +79,13 @@ public class SonicMQComponent implements ISonicMQComponent {
         return containerName;
     }
     
-    public String getState() {
-		return state;
+    public String getStateName() {
+		return stateName;
 	}
+    
+    public short getState() {
+        return state;
+    }
     
     public boolean isOnline() {
 		return online;

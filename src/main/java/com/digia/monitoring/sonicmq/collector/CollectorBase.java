@@ -18,15 +18,15 @@ public class CollectorBase implements ICollector {
         switch (component.getType()) {
         case AGENT:
         	IAgentProxy agentProxy = clientProxyFactory.getAgentProxy(component.getJmxName());
-            collectAgentData(agentProxy, component.getName(), data);
+            collectAgentData(agentProxy, component, data);
             break;
         case AGENT_MANAGER:
         	IAgentManagerProxy agentManagerProxy = clientProxyFactory.getAgentManagerProxy(component.getJmxName());
-            collectAgentManagerData(agentManagerProxy, component.getName(), data);
+            collectAgentManagerData(agentManagerProxy, component, data);
             break;
         case BROKER:
         	IBrokerProxy brokerProxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
-            collectBrokerData(brokerProxy, component.getName(), data);
+            collectBrokerData(brokerProxy, component, data);
             break;
         }
     }
@@ -34,27 +34,27 @@ public class CollectorBase implements ICollector {
     /**
      * Collects agent data. Invoked only if component is agent.
      * @param proxy Agent proxy
-     * @param name Agent name
+     * @param component Discovered component
      * @param data Data collection
      */
-    protected void collectAgentData(IAgentProxy proxy, String name, SonicMQMonitoringData data) {
+    protected void collectAgentData(IAgentProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
     }
 
     /**
      * Collects agent manager data. Invoked only if component is agent manager.
      * @param proxy Agent manager proxy
-     * @param name Agent manager name
+     * @param component Discovered component
      * @param data Data collection
      */
-    protected void collectAgentManagerData(IAgentManagerProxy proxy, String name, SonicMQMonitoringData data) {
+    protected void collectAgentManagerData(IAgentManagerProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
     }
 
     /**
      * Collects broker data. Invoked only if component is broker.
      * @param proxy Broker proxy
-     * @param name Broker name
+     * @param component Discovered component
      * @param data Data collection
      */
-    protected void collectBrokerData(IBrokerProxy proxy, String name, SonicMQMonitoringData data) {
+    protected void collectBrokerData(IBrokerProxy proxy, ISonicMQComponent component, SonicMQMonitoringData data) {
     }
 }
