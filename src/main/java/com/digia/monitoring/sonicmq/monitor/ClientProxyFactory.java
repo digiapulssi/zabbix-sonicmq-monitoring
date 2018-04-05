@@ -7,7 +7,6 @@ import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import javax.sql.CommonDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

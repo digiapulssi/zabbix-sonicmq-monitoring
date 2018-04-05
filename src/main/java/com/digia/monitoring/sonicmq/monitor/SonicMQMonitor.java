@@ -188,7 +188,7 @@ public class SonicMQMonitor implements Closeable {
                 
                 queueData.setData(QUEUE_CONFIG_MAX_SIZE, queueAttributes.getQueueMaxSize());
             } catch (MgmtException ex) {
-                // TODO
+                logger.warn("Could not retrieve configuration for queue " + queue.getName() + ".", ex);
             }
         }
     }
