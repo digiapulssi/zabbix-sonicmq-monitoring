@@ -149,6 +149,8 @@ sonicmq.connection_aggregate.messages.received[{#HOST},{#USER}] | Messages recei
 sonicmq.connection_aggregate.messages.received_s[{#HOST},{#USER}] | Messages received/s for all connections from host/user | |
 
 ### Queues ###
+Queue monitoring supports monitoring individual queues on each broker and monitoring of clustered queues for which stats are combined using appropriate aggregation operation.
+
 Item Syntax | Description | Units |
 ----------- | ----------- | ----- |
 sonicmq.queue.discovery | Discover queues | Provides template variables {#NAME} {#BROKER} {#ID} |
@@ -159,6 +161,14 @@ sonicmq.queue.count[{#BROKER},{#ID}] | Number of messages in queue | |
 sonicmq.queue.time_in_queue[{#BROKER},{#ID}] | Message time in queue | |
 sonicmq.queue.received_s[{#BROKER},{#ID}] | Messages received/s | |
 sonicmq.queue.max_depth[{#BROKER},{#ID}] | Queue maximum depth | |
+sonicmq.clustered.queue.discovery | Discover clustered queues | Provides template variables {#NAME} {#BROKER} {#ID} |
+sonicmq.clustered.queue.max_age[{#BROKER},{#ID}] | Maximum message age in clustered queue | |
+sonicmq.clustered.queue.size[{#BROKER},{#ID}] | Size of messages in clustered queue | |
+sonicmq.clustered.queue.delivered_s[{#BROKER},{#ID}] | Messages delivered/s | |
+sonicmq.clustered.queue.count[{#BROKER},{#ID}] | Number of messages in clustered queue | |
+sonicmq.clustered.queue.time_in_queue[{#BROKER},{#ID}] | Message time in clustered queue | |
+sonicmq.clustered.queue.received_s[{#BROKER},{#ID}] | Messages received/s | |
+sonicmq.clustered.queue.max_depth[{#BROKER},{#ID}] | Clustered queue maximum depth | |
 
 ### Topic Subscriptions ###
 

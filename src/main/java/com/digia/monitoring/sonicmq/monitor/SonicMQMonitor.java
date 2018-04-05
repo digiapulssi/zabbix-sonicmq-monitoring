@@ -191,7 +191,7 @@ public class SonicMQMonitor implements Closeable {
         }
         for (SonicMQQueue queue : discoveredQueues) {
             data.addDiscoveryItem(DiscoveryItemClass.Queue,
-                    new QueueDiscoveryItem(queue.getBroker().getName(), queue.getName()));
+                    new QueueDiscoveryItem(queue.getBroker().getName(), queue.getName(), queue.isClustered()));
         }
         for (SonicMQSubscriber subscriber : discoveredSubscribers) {
             data.addDiscoveryItem(DiscoveryItemClass.TopicSubscription,
