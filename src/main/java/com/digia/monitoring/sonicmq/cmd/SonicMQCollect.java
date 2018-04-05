@@ -51,6 +51,8 @@ public class SonicMQCollect {
             monitor.discoverQueues();
         	LOGGER.debug("Collecting discovered items...");
             monitor.collectDiscoveryItems(data);
+            LOGGER.debug("Collecting configuration items...");
+            monitor.collectConfigurationData(data);
         	LOGGER.debug("Collecting metrics data...");
             monitor.collectMetricsData(data);
         	LOGGER.debug("Collecting connection data...");

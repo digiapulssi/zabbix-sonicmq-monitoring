@@ -12,10 +12,9 @@ public interface IClientProxyFactory {
 
     /**
      * Returns "global" domain level agent manager proxy.
-     * @param domain Domain
      * @return Agent manager proxy instance
      */
-    IAgentManagerProxy getDomainLevelAgentManagerProxy(String domain);
+    IAgentManagerProxy getDomainLevelAgentManagerProxy();
 
     /**
      * Returns broker proxy by broker's canonical (JMX) name.

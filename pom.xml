@@ -13,6 +13,7 @@
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
         <target.dir>${project.build.directory}/SonicMqMonitor</target.dir>
         <sonicmq.version>8.5.1</sonicmq.version>
+        <xerces.version>2.9.1</xerces.version>
         <jackson.version>2.9.2</jackson.version>
         <java.version>1.7</java.version>
     </properties>
@@ -73,6 +74,11 @@
             <groupId>sonicmq</groupId>
             <artifactId>mgmt_config</artifactId>
             <version>${sonicmq.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>${xerces.version}</version>
         </dependency>
     </dependencies>
     <build>

@@ -152,6 +152,7 @@ sonicmq.connection_aggregate.messages.received_s[{#HOST},{#USER}] | Messages re
 Item Syntax | Description | Units |
 ----------- | ----------- | ----- |
 sonicmq.queue.discovery | Discover queues | Provides template variables {#NAME} {#BROKER} {#ID} |
+sonicmq.queue.max_size[{#BROKER},{#ID}] | Maximum queue size in kb  | |
 sonicmq.queue.max_age[{#BROKER},{#ID}] | Maximum message age in queue | |
 sonicmq.queue.size[{#BROKER},{#ID}] | Size of messages in queue | |
 sonicmq.queue.delivered_s[{#BROKER},{#ID}] | Messages delivered/s | |

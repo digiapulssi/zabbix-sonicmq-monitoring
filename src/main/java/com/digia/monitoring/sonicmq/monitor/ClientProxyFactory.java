@@ -1,7 +1,9 @@
 package com.digia.monitoring.sonicmq.monitor;
 
 import java.io.Closeable;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -10,11 +12,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.digia.monitoring.sonicmq.IClientProxyFactory;
+import com.sonicsw.ma.mgmtapi.config.MgmtException;
 import com.sonicsw.mf.jmx.client.JMSConnectorAddress;
 import com.sonicsw.mf.jmx.client.JMSConnectorClient;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentProxy;
 import com.sonicsw.mf.mgmtapi.runtime.MFProxyFactory;
+import com.sonicsw.mq.mgmtapi.config.IBrokerBean;
+import com.sonicsw.mq.mgmtapi.config.IQueuesBean;
+import com.sonicsw.mq.mgmtapi.config.MQMgmtBeanFactory;
+import com.sonicsw.mq.mgmtapi.config.IQueuesBean.IQueueAttributes;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
 import com.sonicsw.mq.mgmtapi.runtime.MQProxyFactory;
 
@@ -37,53 +44,75 @@ class ClientProxyFactory implements Closeable, IClientProxyFactory {
     /** SonicMQ connector client. */
     private JMSConnectorClient client;
     
+    /** SonicMQ management bean factory. */
+    private MQMgmtBeanFactory mgmtBeanFactory;
+    
+    /** Map of broker beans, populated on demand. */
+    private Map<String, IBrokerBean> brokerBeans = new HashMap<>();
+    
+    /** Domain. */
+    private String domain;
+    
+    /** Location URL. */
+    private String location;
+    
+    /** Username. */
+    private String username;
+    
+    /** Password. */
+    private String password;
+    
     private Logger logger = LoggerFactory.getLogger(ClientProxyFactory.class);
 
     /**
      * Creates new ClientProxyFactory instance and connects to
+     * @param domain Domain
      * @param location Connection URL
      * @param username Username
      * @param password Password
      * @param timeout Connection timeout
      */
-    public ClientProxyFactory(String location, String username, String password, long timeout) {
+    public ClientProxyFactory(String domain, String location, String username, String password, long timeout) {
+        this.domain = domain;
+        this.location = location;
+        this.username = username;
+        this.password = password;
+        
         client = new JMSConnectorClient();
         Hashtable<String, String> env = new Hashtable<String, String>();
         env.put(CONNECTION_URLS, location);
         env.put(DEFAULT_USER, username);
         env.put(DEFAULT_PASSWORD, password);
-    	logger.debug("Connecting to {}", location);
+        logger.debug("Connecting to {}", location);
         client.connect(new JMSConnectorAddress(env), timeout);
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.IClientProxyFactory#getDomainLevelAgentManagerProxy(java.lang.String)
-     */
+    public IQueueAttributes getQueueAttributes(String broker, String queue) throws MgmtException {
+        IQueuesBean queuesBean = getBrokerBean(broker).getQueuesBean();
+        return queuesBean.getQueues().getQueue(queue);
+    }
+    
+    public IBrokerBean getBrokerBean(String broker) throws MgmtException {
+        populateBrokerBeans();
+        return brokerBeans.get(broker);
+    }
+    
     @Override
-    public IAgentManagerProxy getDomainLevelAgentManagerProxy(String domain) {
+    public IAgentManagerProxy getDomainLevelAgentManagerProxy() {
         String jmxName = domain + "." + IAgentManagerProxy.GLOBAL_ID + ":ID=" + IAgentManagerProxy.GLOBAL_ID;
         return getAgentManagerProxy(jmxName);
     }
-
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.IClientProxyFactory#getBrokerProxy(java.lang.String)
-     */
+    
     @Override
     public IBrokerProxy getBrokerProxy(String jmxName) {
         return MQProxyFactory.createBrokerProxy(client, newObjectName(jmxName));
     }
     
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.IClientProxyFactory#getAgentManagerProxy(java.lang.String)
-     */
     @Override
     public IAgentManagerProxy getAgentManagerProxy(String jmxName) {
         return MFProxyFactory.createAgentManagerProxy(client, newObjectName(jmxName));
     }
 
-    /* (non-Javadoc)
-     * @see com.digia.monitoring.sonicmq.monitor.IClientProxyFactory#getAgentProxy(java.lang.String)
-     */
     @Override
     public IAgentProxy getAgentProxy(String jmxName) {
         return MFProxyFactory.createAgentProxy(client, newObjectName(jmxName));
@@ -95,7 +124,26 @@ class ClientProxyFactory implements Closeable, IClientProxyFactory {
     public void close() {
         client.disconnect();
     }
+    
+    private void populateBrokerBeans() throws MgmtException {
+        // Bean name is not same as broker name, bean name includes folder structure
+        // So this creates lookup table that works with just broker name
+        MQMgmtBeanFactory factory = getMgmtBeanFactory();
+        for (Object beanName : factory.getBrokerBeanNames()) {
+            IBrokerBean bean = factory.getBrokerBean((String) beanName);
+            brokerBeans.put(bean.getBrokerName(), bean);
+        }
+    }
 
+    private MQMgmtBeanFactory getMgmtBeanFactory() throws MgmtException {
+        if (mgmtBeanFactory == null) {
+            MQMgmtBeanFactory factory = new MQMgmtBeanFactory();
+            factory.connect(domain, location, username, password);
+            this.mgmtBeanFactory = factory;
+        }
+        return mgmtBeanFactory;
+    }
+    
     /**
      * Creates JMX object name from string.
      * @param jmxName JMX name string
