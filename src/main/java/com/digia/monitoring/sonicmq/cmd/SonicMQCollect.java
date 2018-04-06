@@ -49,14 +49,14 @@ public class SonicMQCollect {
             monitor.discoverConnectionsAndSubscribers();
             LOGGER.debug("Discovering queues...");
             monitor.discoverQueues();
-        	LOGGER.debug("Collecting discovered items...");
+            LOGGER.debug("Collecting discovered items...");
             monitor.collectDiscoveryItems(data);
             LOGGER.debug("Collecting configuration items...");
             monitor.collectConfigurationData(data);
-        	LOGGER.debug("Collecting metrics data...");
+            LOGGER.debug("Collecting metrics data...");
             monitor.collectMetricsData(data);
-        	LOGGER.debug("Collecting connection data...");
-            monitor.collectConnectionData(data);
+            //LOGGER.debug("Collecting connection data...");
+            //monitor.collectConnectionData(data);
         } finally {
             monitor.close();
         }
