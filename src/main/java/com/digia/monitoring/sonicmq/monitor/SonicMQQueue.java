@@ -12,6 +12,7 @@ public class SonicMQQueue {
     private SonicMQComponent broker;
     /** Queue name. */
     private String name;
+    private boolean clustered;
 
     /**
      * Creates new SonicMQQueue.
@@ -21,6 +22,7 @@ public class SonicMQQueue {
     public SonicMQQueue(SonicMQComponent broker, IQueueData queue) {
         this.broker = broker;
         this.name = queue.getQueueName();
+        this.clustered = queue.isClusteredQueue();
     }
 
     public SonicMQComponent getBroker() {
@@ -29,5 +31,9 @@ public class SonicMQQueue {
 
     public String getName() {
         return name;
+    }
+    
+    public boolean isClustered() {
+        return clustered;
     }
 }

@@ -20,6 +20,9 @@ function sonicmq_get_stat {
   elif [ "$COMPONENT" = "TopicSubscriptionAggregate" ]; then
     AGGREGATED=$(cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.TopicSubscription.data | map(del(.["{#BROKER}"])) | map(del(.["{#CONNECTIONID}"])) | unique // empty')
     echo '{ "data": '$AGGREGATED'}'
+  elif [ "$COMPONENT" = "ClusteredQueue" ]; then
+    AGGREGATED=$(cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.Queue.data | map(select(.["{#CLUSTERED}"])) | map(del(.["{#BROKER}"])) | unique // empty')
+    echo '{ "data": '$AGGREGATED'}'
   else
     cat $SMQ_MON_OUTPUT_FILE | jq '.discovery.'$COMPONENT' // empty'
   fi
