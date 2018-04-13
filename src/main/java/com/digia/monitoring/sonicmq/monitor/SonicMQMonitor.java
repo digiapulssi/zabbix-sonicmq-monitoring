@@ -122,7 +122,7 @@ public class SonicMQMonitor implements Closeable {
         List<SonicMQConnection> discoveredConnections = new ArrayList<SonicMQConnection>();
         List<SonicMQSubscriber> discoveredSubscribers = new ArrayList<SonicMQSubscriber>();
         for (SonicMQComponent component : discoveredComponents) {
-            if (component.getType() == ComponentType.BROKER) {
+            if (component.getType() == ComponentType.BROKER && component.isOnline()) {
                 IBrokerProxy proxy = clientProxyFactory.getBrokerProxy(component.getJmxName());
                 for (IConnectionData conn : getAllConnections(proxy)) {
                     if (config.isCollectAllConnections() || conn.isApplicationConnection()) {
