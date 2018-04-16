@@ -58,7 +58,11 @@ public class SonicMQCollect {
             //LOGGER.debug("Collecting connection data...");
             //monitor.collectConnectionData(data);
         } finally {
-            monitor.close();
+            try {
+                monitor.close();
+            } catch (IOException ex) {
+                LOGGER.warn("Failed to close monitor connection.", ex);
+            }
         }
         
         // Write output
