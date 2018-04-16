@@ -1,6 +1,5 @@
 package com.digia.monitoring.sonicmq.monitor;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -19,9 +18,7 @@ import com.sonicsw.mf.mgmtapi.runtime.IAgentManagerProxy;
 import com.sonicsw.mf.mgmtapi.runtime.IAgentProxy;
 import com.sonicsw.mf.mgmtapi.runtime.MFProxyFactory;
 import com.sonicsw.mq.mgmtapi.config.IBrokerBean;
-import com.sonicsw.mq.mgmtapi.config.IQueuesBean;
 import com.sonicsw.mq.mgmtapi.config.MQMgmtBeanFactory;
-import com.sonicsw.mq.mgmtapi.config.IQueuesBean.IQueueAttributes;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
 import com.sonicsw.mq.mgmtapi.runtime.MQProxyFactory;
 
@@ -32,7 +29,7 @@ import com.sonicsw.mq.mgmtapi.runtime.MQProxyFactory;
  * 
  * @author Sami Pajunen
  */
-class ClientProxyFactory implements Closeable, IClientProxyFactory {
+class ClientProxyFactory implements IClientProxyFactory {
     
     /** Property specifying connection address for JMS connector client. */
     public static final String CONNECTION_URLS = "ConnectionURLs";
@@ -85,11 +82,6 @@ class ClientProxyFactory implements Closeable, IClientProxyFactory {
         env.put(DEFAULT_PASSWORD, password);
         logger.debug("Connecting to {}", location);
         client.connect(new JMSConnectorAddress(env), timeout);
-    }
-    
-    public IQueueAttributes getQueueAttributes(String broker, String queue) throws MgmtException {
-        IQueuesBean queuesBean = getBrokerBean(broker).getQueuesBean();
-        return queuesBean.getQueues().getQueue(queue);
     }
     
     public IBrokerBean getBrokerBean(String broker) throws MgmtException {
