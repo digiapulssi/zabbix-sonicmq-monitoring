@@ -21,6 +21,7 @@ import com.sonicsw.mq.mgmtapi.config.IBrokerBean;
 import com.sonicsw.mq.mgmtapi.config.MQMgmtBeanFactory;
 import com.sonicsw.mq.mgmtapi.runtime.IBrokerProxy;
 import com.sonicsw.mq.mgmtapi.runtime.MQProxyFactory;
+import com.sonicsw.mx.config.ConfigServiceException;
 
 /**
  * <p>Manages JMS connection to SonicMQ providing access to proxy interfaces that utilize the connection.</p>
@@ -115,6 +116,15 @@ class ClientProxyFactory implements IClientProxyFactory {
      */
     public void close() {
         client.disconnect();
+        
+        // Disconnect also from bean factory if it exists
+        if (mgmtBeanFactory != null) {
+            try {
+                mgmtBeanFactory.disconnect();
+            } catch (ConfigServiceException ex) {
+                logger.error("Error disconnecting from configuration service.", ex);
+            }
+        }
     }
     
     private void populateBrokerBeans() throws MgmtException {
