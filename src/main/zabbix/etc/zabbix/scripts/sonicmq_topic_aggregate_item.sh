@@ -23,8 +23,9 @@ VALUE=$(cat $SMQ_MON_OUTPUT_FILE | \
 if [[ $VALUE -eq null ]]; then
 	VALUE=0
 	echo $VALUE
+else
+	echo $VALUE
 fi
-echo $VALUE
 }
 
 sonicmq_fetch_stat
