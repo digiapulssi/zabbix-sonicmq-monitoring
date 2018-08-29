@@ -14,12 +14,17 @@ cd $(dirname $0)
 . ./sonicmq_env.sh
 
 function sonicmq_get_stat {
-	cat $SMQ_MON_OUTPUT_FILE | \
+VALUE=$(cat $SMQ_MON_OUTPUT_FILE | \
 	jq '.data.Broker[].items.Connection[]
 		| select(.data["connection.Host"] == "'$HOST'" and .data["connection.User"] == "'$USER'")
 		| .items.TopicSubscription["'$TOPIC'"] // empty
-	  | [.data["'$ITEM'"]]
-		| max'
+	  | .data["'$ITEM'"]' | \
+		jq -s 'max')
+if [[ $VALUE -eq null ]]; then
+	VALUE=0
+	echo $VALUE
+fi
+echo $VALUE
 }
 
 sonicmq_fetch_stat
