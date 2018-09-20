@@ -13,11 +13,17 @@ cd $(dirname $0)
 . ./sonicmq_env.sh
 
 function sonicmq_get_stat {
-	cat $SMQ_MON_OUTPUT_FILE | \
+VALUE=$(cat $SMQ_MON_OUTPUT_FILE | \
 	jq '.data.Broker[].items.Connection[]
 		| select(.data["connection.Host"] == "'$HOST'" and .data["connection.User"] == "'$USER'")
 	  | .data["'$ITEM'"]' | \
-	jq -s 'add'
+	jq -s 'add')
+if [[ $VALUE -eq null ]]; then
+	VALUE=0
+	echo $VALUE
+else
+	echo $VALUE
+fi
 }
 
 sonicmq_fetch_stat
