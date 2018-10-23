@@ -4,7 +4,7 @@ set -e
 
 # Usage: ./sonic-log-discovery.sh <path to discovery list configuration file>
 # The configuration file has the following format:
-# INTEGRATION|BACKEND|THRESHOLD_COUNT|LOG_FILE|ID|CUSTOMER
+# INTEGRATION|BACKEND|THRESHOLD_COUNT|THRESHOLD_MINUTES|LOG_FILE|ID|CUSTOMER
 
 CONFIG_FILE="$1"
 if [ -z "$CONFIG_FILE" ]; then
@@ -16,6 +16,8 @@ fi
 #  {#INTEGRATION}
 #  {#BACKEND}
 #  {#THRESHOLD_COUNT}
+#  {#THRESHOLD_MINUTES}
+#  {#THRESHOLD_SECONDS}
 #  {#LOG_FILE}
 #  {#ID}
 #  {#CUSTOMER}
@@ -23,20 +25,22 @@ fi
 echo -n '{"data":['
 LINES=$(cat "$CONFIG_FILE")
 while read LINE; do
-  if [[ "$LINE" =~ ^(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)$ ]]; then
+  if [[ "$LINE" =~ ^(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)\|(.*)$ ]]; then
     INTEGRATION="${BASH_REMATCH[1]}"
     BACKEND="${BASH_REMATCH[2]}"
     THRESHOLD_COUNT="${BASH_REMATCH[3]}"
-    LOG_FILE="${BASH_REMATCH[4]}"
-    ID="${BASH_REMATCH[5]}"
-    CUSTOMER="${BASH_REMATCH[6]}"
+    THRESHOLD_MINUTES="${BASH_REMATCH[4]}"
+    LOG_FILE="${BASH_REMATCH[5]}"
+    ID="${BASH_REMATCH[6]}"
+    CUSTOMER="${BASH_REMATCH[7]}"
+    THRESHOLD_SECONDS="$((THRESHOLD_MINUTES*60))"
 
     if [ -z "$NOFIRST" ]; then
       NOFIRST="1"
     else
       echo -n ","
     fi
-    echo -n '{"{#INTEGRATION}":"'${INTEGRATION}'","{#BACKEND}":"'${BACKEND}'","{#THRESHOLD_COUNT}":"'${THRESHOLD_COUNT}'","{#LOG_FILE}":"'${LOG_FILE}'","{#ID}":"'${ID}'","{#CUSTOMER}":"'${CUSTOMER}'"}'
+    echo -n '{"{#INTEGRATION}":"'${INTEGRATION}'","{#BACKEND}":"'${BACKEND}'","{#THRESHOLD_COUNT}":"'${THRESHOLD_COUNT}'","{#THRESHOLD_MINUTES}":"'${THRESHOLD_MINUTES}'","{#THRESHOLD_SECONDS}":"'${THRESHOLD_SECONDS}'","{#LOG_FILE}":"'${LOG_FILE}'","{#ID}":"'${ID}'","{#CUSTOMER}":"'${CUSTOMER}'"}'
   else
     # Error parsing configuration line; skip it
     echo -n ''
