@@ -14,7 +14,7 @@
         <target.dir>${project.build.directory}/SonicMqMonitor</target.dir>
         <sonicmq.version>8.5.1</sonicmq.version>
         <xerces.version>2.9.1</xerces.version>
-        <jackson.version>2.9.10.3</jackson.version>
+        <jackson.version>2.9.10.4</jackson.version>
         <java.version>1.7</java.version>
     </properties>
 
